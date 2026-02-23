@@ -1,0 +1,20 @@
+#pragma once
+
+enum PumpState {
+    PUMP_BOOT,            // Initialisation du système
+    PUMP_IDLE,            // Écran d'accueil "Bienvenue"
+    PUMP_SELECT_FUEL,     // Choix du type : Diesel, SP95, etc.
+    PUMP_SELECT_AMOUNT,   // Choix du montant max (ex: 100€)
+    PUMP_WAITING_PAYMENT, // Lecture de la carte / insertion PIN
+    PUMP_WAITING_AUTH,    // Communication avec le serveur C#
+    PUMP_READY_TO_FUEL,   // Pistolet autorisé (électrovanne prête)
+    PUMP_FUELING,         // Débit en cours (comptage impulsions)
+    PUMP_FINISHED         // Fin de transaction, affichage résumé
+};
+
+extern PumpState previousPumpState;
+extern PumpState currentPumpState;
+extern unsigned long pumpStateTimer;
+
+void HandlePumpState();
+void HandlePumpLoopingState();
