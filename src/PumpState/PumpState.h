@@ -1,8 +1,11 @@
 #pragma once
 
+#include <Arduino.h>
+
 enum PumpState {
     PUMP_BOOT,            // Initialisation du système
     PUMP_IDLE,            // Écran d'accueil "Bienvenue"
+    PUMP_SELECT_PAYMENT,
     PUMP_SELECT_FUEL,     // Choix du type : Diesel, SP95, etc.
     PUMP_SELECT_AMOUNT,   // Choix du montant max (ex: 100€)
     PUMP_WAITING_PAYMENT, // Lecture de la carte / insertion PIN
@@ -15,6 +18,7 @@ enum PumpState {
 extern PumpState previousPumpState;
 extern PumpState currentPumpState;
 extern unsigned long pumpStateTimer;
+extern String currentTransactionId;
 
 void HandlePumpState();
 void HandlePumpLoopingState();

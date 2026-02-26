@@ -37,7 +37,5 @@ void load_home_screen() {
     lv_label_set_text(btn_label, "DEMARRER");
     lv_obj_center(btn_label);
 
-    // 4. TRANSITION : Charger l'écran avec une animation de fondu
-    // Le 'true' à la fin supprime l'écran précédent (le boot) pour libérer la RAM
-    lv_scr_load_anim(screen_home, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, true);
+    lv_scr_load(screen_home);
 }

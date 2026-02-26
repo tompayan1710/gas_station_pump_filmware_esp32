@@ -3,6 +3,8 @@
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include "SystemState.h"
+#include "../PumpState/PumpState.h"
+
 #include "./Ui/Ui_Manager.h"
 
 WebSocketsClient webSocket;
@@ -16,7 +18,6 @@ void initWebSocket() {
 }
 
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
-
     switch (type) {
 
         case WStype_CONNECTED:
@@ -33,10 +34,14 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
         case WStype_TEXT:
         {
             StaticJsonDocument<256> doc;
+            
             if (deserializeJson(doc, payload)) return;
             if (!doc.containsKey("type")) return;
-
+            
+            
             const char* typeMsg = doc["type"];
+            Serial.print("type : ");
+            Serial.print("typeMsg");
 
             if (strcmp(typeMsg, "PUMP_CONNECTED") == 0) {
                 
@@ -81,6 +86,19 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
                 previousSystemState = SYS_REGISTERING;
                 currentSystemState = SYS_REGISTERING;
             }
+
+
+            if(strcmp(typeMsg, "TRANSACTION_AUTH_OK") == 0){
+                JsonObject payloadObj = doc["payload"];
+                const char *id_transaction = payloadObj["transaction_id"];
+
+                currentTransactionId = String(id_transaction);
+
+                Serial.print("Transaction ID: ");
+                Serial.println(currentTransactionId);
+
+                currentPumpState = PUMP_READY_TO_FUEL;
+            } 
             break;
         }
 
@@ -100,6 +118,40 @@ void sendRegistrationPacket(){
     JsonObject payloadObj = doc.createNestedObject("payload");
     payloadObj["mac"] = WiFi.macAddress();
     payloadObj["pump_type"] = "PUMP";
+
+    String output;
+    serializeJson(doc, output);
+
+    Serial.println("Envoi CONNECT_PUMP");
+    webSocket.sendTXT(output);
+}
+
+void sendStartTransactionAuthPacket(const char* fuelType, const char* paymentType, float amount){
+    StaticJsonDocument<256> doc;
+
+    doc["type"] = "AUTH_TRANSACTION";
+
+    JsonObject payloadObj = doc.createNestedObject("payload");
+    payloadObj["mac"] = WiFi.macAddress();
+    payloadObj["fuel_type"] = fuelType;      // SP95 / DIESEL
+    payloadObj["payment_type"] = paymentType; // CB / CCE
+    payloadObj["amount"] = amount;            // montant choisi
+
+    String output;
+    serializeJson(doc, output);
+
+    webSocket.sendTXT(output);
+}
+
+void sendTransactionCompletePacket(const char* transactionId, float liters, float totalPrice){
+    StaticJsonDocument<256> doc;
+
+    doc["type"] = "TRANSACTION_COMPLETE";
+
+    JsonObject payloadObj = doc.createNestedObject("payload");
+    payloadObj["transaction_id"] = transactionId;
+    payloadObj["liters"] = liters;
+    payloadObj["total_price"] = totalPrice;
 
     String output;
     serializeJson(doc, output);

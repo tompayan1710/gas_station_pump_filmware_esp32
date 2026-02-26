@@ -7,6 +7,8 @@ extern lv_obj_t * wifi_label;
 extern lv_obj_t * db_label;
 extern lv_obj_t * system_label;
 extern lv_obj_t * network_message_label;
+extern lv_obj_t * progress_label;
+extern lv_obj_t * progress_bar;
 
 class LGFX : public lgfx::LGFX_Device {
     lgfx::Panel_GC9A01  _panel_instance;

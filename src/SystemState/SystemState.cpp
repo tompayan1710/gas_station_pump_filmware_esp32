@@ -17,32 +17,35 @@ void handleSystemState(){
         case SYS_WIFI_CONNECTING:
             if (previousSystemState != SYS_WIFI_CONNECTING) {
                 if(wifi_label) lv_label_set_text(wifi_label, "WiFi: Connexion...");
-                Serial.print("Connecting WiFi...");
+                Serial.println("Connecting WiFi...");
+                WiFi.mode(WIFI_STA);
                 WiFi.begin("iphonetom", "345566778");
                 previousSystemState = SYS_WIFI_CONNECTING;
+                lastCheck = 0;
+                nbCheck = 0;
             }
-
-            //Serial.print("Connecting3 WiFi...");
 
             if (millis() - lastCheck >= 500) {
                 lastCheck = millis();
-                    if (WiFi.status() == WL_CONNECTED) {
-                        if(wifi_label) {
-                            lv_label_set_text(wifi_label, "WiFi: Connectee !");
-                            lv_obj_set_style_text_color(wifi_label, lv_color_hex(0x00FF00), 0); // Vert
-                        }
-                        Serial.println("WiFi connected");
-                        Serial.println("IP address: ");
-                        Serial.println(WiFi.localIP());
-                        Serial.print("Connecting to server...");
+                nbCheck++;
 
-                        previousSystemState = currentSystemState;
-                        currentSystemState = SYS_WS_CONNECTING;
+                if (WiFi.status() == WL_CONNECTED) {
+                    if(wifi_label) {
+                        lv_label_set_text(wifi_label, "WiFi: Connectee !");
+                        lv_obj_set_style_text_color(wifi_label, lv_color_hex(0x00FF00), 0);
                     }
-                }
+                    Serial.println("WiFi connected");
+                    Serial.print("IP address: ");
+                    Serial.println(WiFi.localIP());
 
-                //vTaskDelay(100 / portTICK_PERIOD_MS);
-            //Serial.print("Connecting2 WiFi...");
+                    previousSystemState = currentSystemState;
+                    currentSystemState = SYS_WS_CONNECTING;
+                } if (nbCheck > 5 && nbCheck % 10 == 0) {
+                    // Toutes les 10s supplementaires, on retente
+                    Serial.printf("WiFi retry #%lu...\n", nbCheck / 20);
+                    WiFi.reconnect();
+                }
+            }
             break;
         case SYS_WS_CONNECTING:
             if (previousSystemState != SYS_WS_CONNECTING) {
@@ -117,7 +120,7 @@ void handleSystemState(){
 
                 previousSystemState = SYS_READY;
 
-                currentPumpState = PUMP_SELECT_FUEL;
+                currentPumpState = PUMP_IDLE;
             }
             //vTaskDelay(100 / portTICK_PERIOD_MS);
             break;

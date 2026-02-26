@@ -14,7 +14,7 @@ static void fuel_event_handler(lv_event_t * e) {
         Serial.printf("Carburant sélectionné : %s\n", fuel_type);
         
         // On passe à l'étape suivante de la machine à état
-        currentPumpState = PUMP_SELECT_AMOUNT; 
+        currentPumpState = PUMP_SELECT_PAYMENT; 
     }
 }
 
@@ -54,5 +54,5 @@ void load_fuel_selection_screen() {
     lv_obj_center(lbl_sp95);
 
     // 4. Animation de chargement
-    lv_scr_load_anim(screen_fuel, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, true);
+    lv_scr_load(screen_fuel);
 }

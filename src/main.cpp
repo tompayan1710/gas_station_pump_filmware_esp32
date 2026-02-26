@@ -6,6 +6,7 @@
 #include <ArduinoJson.h>
 #include <WiFi.h>
 
+#include "./Config.h"
 #include "./PumpState/PumpState.h"
 #include "./SystemState/SystemState.h"
 #include "./SystemState/WebSocketManager.h"
@@ -15,6 +16,7 @@ void setup() {
     currentSystemState = SYS_BOOT;
     Serial.begin(115200);
     delay(1000);
+
 
     tft.init();
     tft.setSwapBytes(true);
@@ -42,7 +44,34 @@ void setup() {
 
     lv_timer_handler();
 
+    // === DIAGNOSTIC TEMPORAIRE - a supprimer apres test ===
+    /*WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+    Serial.println("=== Scan reseaux WiFi ===");
+    int n = WiFi.scanNetworks();
+    if (n == 0) {
+        Serial.println("Aucun reseau trouve - WiFi ESP32 possiblement HS");
+    } else {
+        for (int i = 0; i < n; i++) {
+            Serial.printf("  [%d] SSID: %s  RSSI: %d dBm\n", i+1, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
+        }
+    }
+    Serial.println("=== Fin scan ===");*/
+    // ======================================================
+
     currentSystemState = SYS_WIFI_CONNECTING;
+
+    ledcSetup(PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
+    ledcAttachPin(ENA, PWM_CHANNEL);
+
+    pinMode(IN1, OUTPUT);
+    pinMode(IN2, OUTPUT);
+    pinMode(DIS, INPUT);
+
+
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
 }
 
 void loop() {
@@ -50,12 +79,12 @@ void loop() {
 
     lv_tick_inc(5);      // <-- AJOUT CRITIQUE
     lv_timer_handler();
-    delay(5);
+    delay(1);
 
     HandlePumpState();
     handleSystemState();
 
-    HandlePumpLoopingState();
+    //HandlePumpLoopingState();
     
     /*static unsigned long t = 0;
     static bool toggle = false;

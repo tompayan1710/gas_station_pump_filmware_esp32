@@ -8,6 +8,8 @@ lv_obj_t * wifi_label = NULL;
 lv_obj_t * db_label = NULL;
 lv_obj_t * system_label = NULL;
 lv_obj_t * network_message_label = NULL;
+lv_obj_t * progress_label = NULL;
+lv_obj_t * progress_bar = NULL;
 
 LGFX tft;
 lv_color_t buf[240 * 10]; // Buffer agrandi pour plus de fluidité
