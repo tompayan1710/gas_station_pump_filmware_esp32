@@ -9,25 +9,28 @@
 #include "../Ui/Screen_Fuel_Selection.h"
 #include "../Ui/Screen_Payment_Type.h"
 #include "../Ui/Screen_Payment_Amount.h"
-
-#include "../Ui/Screen_Waiting_Auth.h"
-
+#include "../Ui/Screen_Load_Payment.h"
+#include "../Ui/Screen_Transaction_Waiting_Auth.h"
 #include "../Ui/Screen_Ready_To_Fuel.h"
 #include "../Ui/Screen_Pump_Filing.h"
-#include "../Ui/Screen_Finish.h"
+#include "../Ui/Screen_Transaction_Waiting_Complete.h"
+#include "../Ui/Screen_Thank_You.h"
 
 // On initialise les variables
 PumpState currentPumpState = PUMP_BOOT;
 PumpState previousPumpState = PUMP_BOOT;
 unsigned long pumpStateTimer = 0;
+int pumpDelay = 0;
+PumpState pumpDelayNextCurrentPumpState;
 String currentTransactionId = "";
+
 
 void HandlePumpState() {
 
-    static char *fuelType;
-    static float fuelPrice;
+    static const char *fuelType;
+    static float price_per_liter;
     static float amount;
-    static char *paymentType;
+    static const char *paymentType;
 
     static float liters = 0.0;
     static unsigned long lastFlowTime = 0;
@@ -66,7 +69,7 @@ void HandlePumpState() {
 
             if(millis() - pumpStateTimer > 3000){
                 fuelType = "SP95";
-                fuelPrice = 1.24;
+                price_per_liter = 1.24;
                 pumpStateTimer = 0;
                 currentPumpState = PUMP_SELECT_PAYMENT;
             }
@@ -106,13 +109,20 @@ void HandlePumpState() {
             break;
         }
         case PUMP_WAITING_PAYMENT:{
-            // load_payment_screen();
-            currentPumpState = PUMP_WAITING_AUTH;
-            
-            Serial.println("Action: Affichage 'Insérez carte'");
-            sendStartTransactionAuthPacket(fuelType, paymentType, amount);
-            previousPumpState = PUMP_WAITING_PAYMENT;
-            currentPumpState = PUMP_WAITING_AUTH;
+
+            if(previousPumpState != PUMP_WAITING_PAYMENT){
+                load_payment_screen();
+                Serial.println("Action: Affichage 'Insérez carte'");
+                sendStartTransactionAuthPacket(fuelType, paymentType, amount);
+
+                pumpStateTimer = millis();
+
+                previousPumpState = PUMP_WAITING_PAYMENT;
+            }
+
+            currentPumpState = PUMP_DELAY;
+            pumpDelay = 2000;
+            pumpDelayNextCurrentPumpState = PUMP_WAITING_AUTH;
             break;
         }
         case PUMP_WAITING_AUTH:{
@@ -126,7 +136,7 @@ void HandlePumpState() {
 
         case PUMP_READY_TO_FUEL:{
             Serial.println("Action: PUMP_READY_TO_FUEL");
-            if(previousPumpState != PUMP_READY_TO_FUEL && currentPumpState == PUMP_READY_TO_FUEL){
+            if(previousPumpState != PUMP_READY_TO_FUEL){
                 load_action_prompt();
                 previousPumpState = PUMP_READY_TO_FUEL;
             }
@@ -166,26 +176,79 @@ void HandlePumpState() {
                 }
             }
 
-            // Si plus de débit depuis 5 secondes
-            if(millis() - lastFlowTime > 5000){
-                currentPumpState = PUMP_FINISHED;
+            // Si plus de débit depuis 4 secondes
+            if(millis() - lastFlowTime > 4000){
+                currentPumpState = PUMP_TRANSACTION_COMPLETE;
             }
 
             break;
         }
-        case PUMP_FINISHED:{
+        case PUMP_TRANSACTION_COMPLETE: {
+            static unsigned long retryTimer = 0;
+            static int retryCount = 0;
+            const int maxRetry = 4; // par exemple
 
-            if(previousPumpState != PUMP_FINISHED){
-                load_finished_screen(liters);
-                previousPumpState = PUMP_FINISHED;
-                pumpStateTimer = millis();
+            if(previousPumpState != PUMP_TRANSACTION_COMPLETE) {
 
-                sendTransactionCompletePacket(currentTransactionId.c_str(), liters, fuelPrice * liters);
+                float totalPrice = price_per_liter * liters;
+                load_transaction_waiting_complete_screen(liters, price_per_liter, totalPrice);
+
+                sendTransactionCompletePacket(currentTransactionId.c_str(), liters);
+
+                retryTimer = millis();
+                retryCount = 0;
+                previousPumpState = PUMP_TRANSACTION_COMPLETE;
             }
 
-            // Retour automatique après 4 secondes
+            if(millis() - retryTimer > 4000) {
+
+                if(retryCount < maxRetry) {
+
+                    Serial.println("Retry COMPLETE...");
+                    sendTransactionCompletePacket(currentTransactionId.c_str(), liters);
+
+                    retryTimer = millis();
+                    retryCount++;
+
+                } else {
+                    Serial.println("Max retry atteint !");
+                    currentPumpState = PUMP_IDLE;
+                    // afficher un écran erreur
+                    // idéalement sauvegarder la transaction en flash
+                }
+            }
+
+            break;
+        }
+        case PUMP_FINISHED: {
+            if(previousPumpState != PUMP_FINISHED) {
+
+                float totalPrice = price_per_liter * liters;
+                load_thank_you_screen(liters, totalPrice);
+
+                pumpStateTimer = millis();
+                previousPumpState = PUMP_FINISHED;
+            }
+
             if(millis() - pumpStateTimer > 4000){
                 currentPumpState = PUMP_IDLE;
+            }
+
+            break;
+        }
+        case PUMP_DELAY: {
+
+            if(previousPumpState != PUMP_DELAY){
+
+                // Ici on vient juste attentre
+
+                pumpStateTimer = millis();
+                previousPumpState = PUMP_DELAY;
+            }
+
+            // Attendre pumpDelay avant de passer à READY
+            if(millis() - pumpStateTimer > pumpDelay){
+                currentPumpState = pumpDelayNextCurrentPumpState;
             }
 
             break;

@@ -12,12 +12,19 @@ enum PumpState {
     PUMP_WAITING_AUTH,    // Communication avec le serveur C#
     PUMP_READY_TO_FUEL,   // Pistolet autorisé (électrovanne prête)
     PUMP_FUELING,         // Débit en cours (comptage impulsions)
-    PUMP_FINISHED         // Fin de transaction, affichage résumé
+    PUMP_TRANSACTION_COMPLETE,
+    PUMP_FINISHED,         // Fin de transaction, affichage résumé
+    PUMP_DELAY
 };
 
 extern PumpState previousPumpState;
 extern PumpState currentPumpState;
 extern unsigned long pumpStateTimer;
+
+// PUMP_DELAY
+extern int pumpDelay;
+extern PumpState pumpDelayNextCurrentPumpState;
+
 extern String currentTransactionId;
 
 void HandlePumpState();

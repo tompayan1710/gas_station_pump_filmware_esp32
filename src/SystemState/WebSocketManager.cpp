@@ -41,7 +41,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
             
             const char* typeMsg = doc["type"];
             Serial.print("type : ");
-            Serial.print("typeMsg");
+            Serial.print(typeMsg);
 
             if (strcmp(typeMsg, "PUMP_CONNECTED") == 0) {
                 
@@ -76,8 +76,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 
                 previousSystemState = SYS_REGISTERING;
                 currentSystemState = SYS_READY;
-            }
-            if (strcmp(typeMsg, "ERROR_DB") == 0) {
+            }else if (strcmp(typeMsg, "ERROR_DB") == 0) {
                 const char* message = doc["message"] | "Erreur DB";
                 /*if(db_label) {
                     lv_label_set_text(db_label, message);
@@ -85,10 +84,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
                 }*/
                 previousSystemState = SYS_REGISTERING;
                 currentSystemState = SYS_REGISTERING;
-            }
-
-
-            if(strcmp(typeMsg, "TRANSACTION_AUTH_OK") == 0){
+            }else if(strcmp(typeMsg, "TRANSACTION_AUTH_OK") == 0){
                 JsonObject payloadObj = doc["payload"];
                 const char *id_transaction = payloadObj["transaction_id"];
 
@@ -97,8 +93,26 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
                 Serial.print("Transaction ID: ");
                 Serial.println(currentTransactionId);
 
-                currentPumpState = PUMP_READY_TO_FUEL;
-            } 
+                pumpDelay = 2000;
+                pumpDelayNextCurrentPumpState = PUMP_READY_TO_FUEL;
+                currentPumpState = PUMP_DELAY;
+            } else if(strcmp(typeMsg, "TRANSACTION_AUTH_REFUSED") == 0){
+                JsonObject payloadObj = doc["payload"];
+
+                currentTransactionId = "";
+
+                currentPumpState = PUMP_IDLE;
+            } else if(strcmp(typeMsg, "TRANSACTION_COMPLETE_OK") == 0){
+                currentTransactionId = "";
+                previousPumpState = PUMP_TRANSACTION_COMPLETE;
+                currentPumpState = PUMP_FINISHED;
+                
+            } else if(strcmp(typeMsg, "TRANSACTION_COMPLETE_ERROR") == 0){
+
+                Serial.println("Erreur COMPLETE - retry...");
+
+                currentPumpState = PUMP_TRANSACTION_COMPLETE;
+            }
             break;
         }
 
@@ -143,7 +157,7 @@ void sendStartTransactionAuthPacket(const char* fuelType, const char* paymentTyp
     webSocket.sendTXT(output);
 }
 
-void sendTransactionCompletePacket(const char* transactionId, float liters, float totalPrice){
+void sendTransactionCompletePacket(const char* transactionId, float liters){
     StaticJsonDocument<256> doc;
 
     doc["type"] = "TRANSACTION_COMPLETE";
@@ -151,7 +165,6 @@ void sendTransactionCompletePacket(const char* transactionId, float liters, floa
     JsonObject payloadObj = doc.createNestedObject("payload");
     payloadObj["transaction_id"] = transactionId;
     payloadObj["liters"] = liters;
-    payloadObj["total_price"] = totalPrice;
 
     String output;
     serializeJson(doc, output);
