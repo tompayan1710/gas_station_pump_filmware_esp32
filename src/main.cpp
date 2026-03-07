@@ -77,12 +77,12 @@ void setup() {
 void loop() {
     webSocket.loop();
 
+    handleSystemState();
+    HandlePumpState();
+
     lv_tick_inc(5);      // <-- AJOUT CRITIQUE
     lv_timer_handler();
     delay(1);
-
-    HandlePumpState();
-    handleSystemState();
 
     //HandlePumpLoopingState();
     

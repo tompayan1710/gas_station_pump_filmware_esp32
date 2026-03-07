@@ -3,6 +3,7 @@
 
 #include "../Config.h"
 #include "../SystemState/WebSocketManager.h"
+#include "./KeypadManager.h"
 
 #include "../Ui/Ui_Manager.h"
 #include "../Ui/Screen_Home.h"
@@ -15,6 +16,8 @@
 #include "../Ui/Screen_Pump_Filing.h"
 #include "../Ui/Screen_Transaction_Waiting_Complete.h"
 #include "../Ui/Screen_Thank_You.h"
+
+
 
 // On initialise les variables
 PumpState currentPumpState = PUMP_BOOT;
@@ -104,25 +107,34 @@ void HandlePumpState() {
             if(millis() - pumpStateTimer > 3000){
                 amount = 100.0;
                 pumpStateTimer = 0;
-                currentPumpState = PUMP_WAITING_PAYMENT;
+                currentPumpState = PUMP_WAITING_PIN;
             }
             break;
         }
-        case PUMP_WAITING_PAYMENT:{
+        case PUMP_WAITING_PIN:{
 
-            if(previousPumpState != PUMP_WAITING_PAYMENT){
-                load_payment_screen();
+            if(previousPumpState != PUMP_WAITING_PIN){
+                load_pin_screen();
                 Serial.println("Action: Affichage 'Insérez carte'");
-                sendStartTransactionAuthPacket(fuelType, paymentType, amount);
+                //sendStartTransactionAuthPacket(fuelType, paymentType, amount);
 
                 pumpStateTimer = millis();
 
-                previousPumpState = PUMP_WAITING_PAYMENT;
+                previousPumpState = PUMP_WAITING_PIN;
+            }
+            
+            char key = keypad.getKey();
+
+            if (key) {
+                Serial.print("Touche : ");
+                Serial.println(key);
+
+                //handleKey(key); // ta logique PIN
             }
 
-            currentPumpState = PUMP_DELAY;
-            pumpDelay = 2000;
-            pumpDelayNextCurrentPumpState = PUMP_WAITING_AUTH;
+            // currentPumpState = PUMP_DELAY;
+            // pumpDelay = 2000;
+            // pumpDelayNextCurrentPumpState = PUMP_WAITING_AUTH;
             break;
         }
         case PUMP_WAITING_AUTH:{

@@ -8,6 +8,10 @@
 // === DIGITAL ===
 #define DIS 22
 
+#define KEYPAD_ROWS 4
+#define KEYPAD_COLS 3
+
+
 // === ANALOG ===
 #define POT 35
 constexpr int PWM_CHANNEL = 0;

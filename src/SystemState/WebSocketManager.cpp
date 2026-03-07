@@ -15,13 +15,24 @@ void initWebSocket() {
     webSocket.begin("172.20.10.2", 8080, "/");
     webSocket.onEvent(webSocketEvent);
     webSocket.setReconnectInterval(5000);
+    //webSocket.enableHeartbeat(15000, 3000, 2);
 }
 
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
     switch (type) {
 
+        /*case WStype_PING:
+            Serial.println("[ESP] Ping reçu du serveur");
+            webSocket.sendPong();
+            break;*/
+
+        case WStype_PONG:
+            Serial.println("[ESP] Pong reçu");
+            break;
         case WStype_CONNECTED:
         {
+
+            Serial.println("[ESP] Connecté WS");
             if(websocket_label) {
                 lv_label_set_text(websocket_label, "WS: Connectee !");
                 lv_obj_set_style_text_color(websocket_label, lv_color_hex(0x00FF00), 0); // Vert
@@ -43,32 +54,37 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
             Serial.print("type : ");
             Serial.print(typeMsg);
 
-            if (strcmp(typeMsg, "PUMP_CONNECTED") == 0) {
+
+            if (strcmp(typeMsg, "PING") == 0) {
+                Serial.println("[ESP] PING reçu");
+                StaticJsonDocument<256> doc;
+                doc["type"] = "PONG";
+                String output;
+                serializeJson(doc, output);
+
+                webSocket.sendTXT(output);
+                Serial.println("[ESP] Envoie PONG");
+            }
+            if (strcmp(typeMsg, "IDENTIFY_OK") == 0) {
                 
                 const char* type = doc["type"];
                 JsonObject payloadObj = doc["payload"];
 
                 const char* mac = payloadObj["mac"];
-                const char* pump_type = payloadObj["pump_type"];
 
                 Serial.print("type : ");
                 Serial.println(type);
                 Serial.print("mac : ");
                 Serial.println(mac);
-                Serial.print("pump_type : ");
-                Serial.println(pump_type);
 
-
-                String displayText = "pump_type : ";
-                displayText += pump_type;
-                displayText += " \n| mac : ";
+                String displayText = " \n| mac : ";
                 displayText += mac;
 
                 lastWebSocketMessage = String((char*)payload);
                 //lv_label_set_text(websocket_label, displayText.c_str());
 
                 char buffer[64];
-                snprintf(buffer, sizeof(buffer), "Pompe: %s\nMAC: %s", pump_type, mac);
+                snprintf(buffer, sizeof(buffer), "MAC: %s", mac);
                 
                 if(network_message_label) {
                     lv_label_set_text(network_message_label, buffer);
@@ -118,7 +134,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 
         case WStype_DISCONNECTED:
         {
-            Serial.println("WebSocket disconnected");
+            Serial.println("[ESP] Déconnecté WS");
             currentSystemState = SYS_WIFI_CONNECTING;
             break;
         }
@@ -127,16 +143,17 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 
 void sendRegistrationPacket(){
     StaticJsonDocument<128> doc;
-    doc["type"] = "CONNECT_PUMP";
+    doc["type"] = "IDENTIFY";
 
     JsonObject payloadObj = doc.createNestedObject("payload");
+    payloadObj["client_type"] = "EQUIPMENT";
     payloadObj["mac"] = WiFi.macAddress();
-    payloadObj["pump_type"] = "PUMP";
+    payloadObj["equipment_type"] = "FUEL_PUMP"; // Ou EV_CHARGER -> Electric Vehicle Charger 
 
     String output;
     serializeJson(doc, output);
 
-    Serial.println("Envoi CONNECT_PUMP");
+    Serial.println("Envoi IDENTIFY");
     webSocket.sendTXT(output);
 }
 

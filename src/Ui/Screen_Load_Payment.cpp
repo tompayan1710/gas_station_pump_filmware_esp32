@@ -5,7 +5,7 @@ static lv_obj_t * pin_label = nullptr;
 LV_FONT_DECLARE(font_playfair_display_1bpp);
 
 
-void load_payment_screen() {
+void load_pin_screen() {
 
     lv_obj_t * screen = lv_obj_create(NULL);
     lv_obj_set_style_bg_color(screen, lv_color_hex(0x000000), 0);

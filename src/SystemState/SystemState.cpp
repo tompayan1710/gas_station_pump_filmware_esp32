@@ -40,7 +40,7 @@ void handleSystemState(){
 
                     previousSystemState = currentSystemState;
                     currentSystemState = SYS_WS_CONNECTING;
-                } if (nbCheck > 5 && nbCheck % 10 == 0) {
+                } else if (nbCheck > 5 && nbCheck % 10 == 0) {
                     // Toutes les 10s supplementaires, on retente
                     Serial.printf("WiFi retry #%lu...\n", nbCheck / 20);
                     WiFi.reconnect();

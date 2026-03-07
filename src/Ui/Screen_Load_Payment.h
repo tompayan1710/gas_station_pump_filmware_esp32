@@ -1,4 +1,4 @@
 #pragma once
 #include <lvgl.h>
 
-void load_payment_screen();
+void load_pin_screen();

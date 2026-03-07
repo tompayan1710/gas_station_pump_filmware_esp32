@@ -8,7 +8,7 @@ static void amount_event_handler(lv_event_t * e) {
 
     if(lv_event_get_code(e) == LV_EVENT_CLICKED) {
         Serial.printf("Montant choisi: %s\n", amount);
-        currentPumpState = PUMP_WAITING_PAYMENT;
+        currentPumpState = PUMP_WAITING_PIN;
     }
 }
 
