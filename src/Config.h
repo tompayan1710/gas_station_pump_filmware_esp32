@@ -1,15 +1,14 @@
 #pragma once
 
 // === MOTOR PINS ===
-#define ENA 25
-#define IN1 26
-#define IN2 27
+#define RPWM 4
+#define LPWM 33
+constexpr int PWM_CHANNEL_R = 0;
+constexpr int PWM_CHANNEL_L = 1;
 
 // === DIGITAL ===
 #define DIS 22
 
-#define KEYPAD_ROWS 4
-#define KEYPAD_COLS 3
 
 
 // === ANALOG ===

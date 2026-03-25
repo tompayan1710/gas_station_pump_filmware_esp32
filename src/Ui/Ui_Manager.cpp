@@ -8,11 +8,12 @@ lv_obj_t * wifi_label = NULL;
 lv_obj_t * db_label = NULL;
 lv_obj_t * system_label = NULL;
 lv_obj_t * network_message_label = NULL;
+lv_obj_t * pin_label = NULL;
 lv_obj_t * progress_label = NULL;
 lv_obj_t * progress_bar = NULL;
 
 LGFX tft;
-lv_color_t buf[240 * 10]; // Buffer agrandi pour plus de fluidité
+lv_color_t buf[LVGL_BUFFER_SIZE]; // Buffer agrandi pour plus de fluidité
 
 /* --- CONFIGURATION ÉCRAN --- */
 LGFX::LGFX(void) {
@@ -21,26 +22,59 @@ LGFX::LGFX(void) {
         cfg.spi_host = VSPI_HOST;
         cfg.pin_sclk = 18; 
         cfg.pin_mosi = 23;
-        cfg.pin_miso = -1;
-        cfg.pin_dc   = 2;
+        cfg.pin_miso = 19;
+        cfg.pin_dc = 17;
+
+        cfg.freq_write = 20000000;
+        cfg.freq_read  = 16000000;
 
         _bus_instance.config(cfg);
         _panel_instance.setBus(&_bus_instance);
     }
     {
         auto cfg = _panel_instance.config();
-        cfg.pin_cs           = 5;
-        cfg.pin_rst          = 4;
-        cfg.panel_width      = 240;
-        cfg.panel_height     = 240;
+
+        cfg.pin_cs  = 5;
+        cfg.pin_rst = 2;
+
+        cfg.panel_width  = 320;
+        cfg.panel_height = 480;
+
+        cfg.memory_width  = 320;
+        cfg.memory_height = 480;
+
+        cfg.offset_x = 0;
+        cfg.offset_y = 0;
+
+        cfg.rgb_order = false;
+        cfg.bus_shared = true;
+
         _panel_instance.config(cfg);
+    }
+
+    {
+        auto cfg = _touch_instance.config();
+
+        cfg.spi_host = VSPI_HOST;
+
+        cfg.pin_sclk = 18;
+        cfg.pin_mosi = 23;
+        cfg.pin_miso = 19;
+
+        cfg.pin_cs  = 16;
+        cfg.pin_int = 21;
+
+        cfg.bus_shared = true;
+
+        _touch_instance.config(cfg);
+        _panel_instance.setTouch(&_touch_instance);
     }
     setPanel(&_panel_instance);
 }
 
 
 /* --- INTERFACE LVGL <-> LOVYANGFX --- */
-void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
+/*void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
 {
     if (tft.getStartCount() == 0) tft.startWrite();
 
@@ -53,6 +87,21 @@ void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map
     );
 
     lv_display_flush_ready(disp);
+}*/
+
+void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
+{
+    uint32_t w = area->x2 - area->x1 + 1;
+    uint32_t h = area->y2 - area->y1 + 1;
+
+    tft.startWrite();
+
+    tft.setAddrWindow(area->x1, area->y1, w, h);
+    tft.pushPixels((uint16_t*)px_map, w * h);
+
+    tft.endWrite();
+
+    lv_display_flush_ready(disp);
 }
 
 /* --- TES FONCTIONS UI (Adaptées pour 240x240) --- */
@@ -60,9 +109,7 @@ void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map
 // Note: Pour les images (img_bg, img_user, etc.), tu dois les convertir 
 // avec l'outil en ligne LVGL et les ajouter à ton projet !
 LV_IMG_DECLARE(img_bg);
-LV_IMG_DECLARE(img_user);
-LV_IMG_DECLARE(icon_key);
-LV_IMG_DECLARE(icon_numpad);
+
 
 void ui_init() {
     // Style de base sans bordure
@@ -103,4 +150,20 @@ void ui_init() {
     lv_obj_set_style_text_color(network_message_label, lv_color_hex(0xffffff), 0);
     lv_obj_align(network_message_label, LV_ALIGN_CENTER, 0, 60); // Placé un peu plus bas
     lv_label_set_text(network_message_label, "aucun message");
+}
+
+void my_touch_read(lv_indev_t * indev, lv_indev_data_t * data)
+{
+    uint16_t x, y;
+
+    if (tft.getTouch(&x, &y))
+    {
+        data->state = LV_INDEV_STATE_PRESSED;
+        data->point.x = x;
+        data->point.y = y;
+    }
+    else
+    {
+        data->state = LV_INDEV_STATE_RELEASED;
+    }
 }

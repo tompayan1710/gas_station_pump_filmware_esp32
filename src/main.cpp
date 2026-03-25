@@ -19,12 +19,12 @@ void setup() {
 
 
     tft.init();
+    tft.setRotation(1);
+
     tft.setSwapBytes(true);
-    pinMode(22, OUTPUT); // Souvent le pin 22 ou 21 sur les cartes rondes
-    digitalWrite(22, HIGH);
 
     lv_init();
-    lv_display_t * disp = lv_display_create(240, 240);
+    lv_display_t * disp = lv_display_create(480, 320);
     lv_display_set_default(disp);
     //lv_tick_set_cb(millis);
 
@@ -39,6 +39,11 @@ void setup() {
         sizeof(lv_color_t) * LVGL_BUFFER_SIZE,
         LV_DISPLAY_RENDER_MODE_PARTIAL
     );
+
+    lv_indev_t * indev = lv_indev_create();
+    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(indev, my_touch_read);
+
 
     ui_init();  
 
@@ -62,16 +67,16 @@ void setup() {
 
     currentSystemState = SYS_WIFI_CONNECTING;
 
-    ledcSetup(PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
-    ledcAttachPin(ENA, PWM_CHANNEL);
+    ledcSetup(PWM_CHANNEL_R, PWM_FREQ, PWM_RESOLUTION);
+    ledcAttachPin(RPWM, PWM_CHANNEL_R);
 
-    pinMode(IN1, OUTPUT);
-    pinMode(IN2, OUTPUT);
+    ledcSetup(PWM_CHANNEL_L, PWM_FREQ, PWM_RESOLUTION);
+    ledcAttachPin(LPWM, PWM_CHANNEL_L);
+
+    ledcWrite(PWM_CHANNEL_R, 0);
+    ledcWrite(PWM_CHANNEL_L, 0);
+
     pinMode(DIS, INPUT);
-
-
-    digitalWrite(IN1, HIGH);
-    digitalWrite(IN2, LOW);
 }
 
 void loop() {
@@ -85,7 +90,12 @@ void loop() {
     delay(1);
 
     //HandlePumpLoopingState();
-    
+    uint16_t x, y;
+
+    if(tft.getTouch(&x,&y))
+    {
+        Serial.printf("Touch %d %d\n",x,y);
+    }
     /*static unsigned long t = 0;
     static bool toggle = false;
 

@@ -113,8 +113,6 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
                 pumpDelayNextCurrentPumpState = PUMP_READY_TO_FUEL;
                 currentPumpState = PUMP_DELAY;
             } else if(strcmp(typeMsg, "TRANSACTION_AUTH_REFUSED") == 0){
-                JsonObject payloadObj = doc["payload"];
-
                 currentTransactionId = "";
 
                 currentPumpState = PUMP_IDLE;
@@ -129,6 +127,20 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 
                 currentPumpState = PUMP_TRANSACTION_COMPLETE;
             }
+            else if(strcmp(typeMsg, "PUMP_TOGGLE") == 0){
+                JsonObject payloadObj = doc["payload"];
+
+                const char *status = payloadObj["status"];
+                
+                Serial.print("PUMP_TOGGLE status : ");
+                Serial.println(status);
+
+                if(strcmp(status, "Disponible")){
+                    currentPumpState = PUMP_IDLE;
+                }else if(strcmp(status, "Hors_Service")){
+                    currentPumpState = PUMP_HS;
+                }
+            }
             break;
         }
 
@@ -136,6 +148,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
         {
             Serial.println("[ESP] Déconnecté WS");
             currentSystemState = SYS_WIFI_CONNECTING;
+            currentPumpState = PUMP_HS;
             break;
         }
     }

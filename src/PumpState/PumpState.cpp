@@ -10,12 +10,14 @@
 #include "../Ui/Screen_Fuel_Selection.h"
 #include "../Ui/Screen_Payment_Type.h"
 #include "../Ui/Screen_Payment_Amount.h"
-#include "../Ui/Screen_Load_Payment.h"
+#include "../Ui/Screen_PIN.h"
+#include "../Ui/Screen_Verify_Pin.h"
 #include "../Ui/Screen_Transaction_Waiting_Auth.h"
 #include "../Ui/Screen_Ready_To_Fuel.h"
 #include "../Ui/Screen_Pump_Filing.h"
 #include "../Ui/Screen_Transaction_Waiting_Complete.h"
 #include "../Ui/Screen_Thank_You.h"
+#include "../Ui/Screen_HS.h"
 
 
 
@@ -48,10 +50,10 @@ void HandlePumpState() {
                 previousPumpState = PUMP_IDLE;
             } 
             
-            if(millis() - pumpStateTimer > 3000){
+            /*if(millis() - pumpStateTimer > 3000){
                 pumpStateTimer = 0;
                 currentPumpState = PUMP_SELECT_FUEL;
-            }
+            }*/
 
             /*
             int valPot = map(analogRead(POT), 0, 4095, 0, 255);
@@ -66,15 +68,12 @@ void HandlePumpState() {
                 load_fuel_selection_screen();
                 Serial.println("Affichage choix carburant");
 
-                pumpStateTimer = millis();
-                previousPumpState = PUMP_SELECT_FUEL;
-            }
-
-            if(millis() - pumpStateTimer > 3000){
                 fuelType = "SP95";
                 price_per_liter = 1.24;
                 pumpStateTimer = 0;
-                currentPumpState = PUMP_SELECT_PAYMENT;
+
+                pumpStateTimer = millis();
+                previousPumpState = PUMP_SELECT_FUEL;
             }
 
             break;
@@ -84,15 +83,13 @@ void HandlePumpState() {
                 load_payment_type_screen();
                 Serial.println("Affichage choix carte");
 
+                paymentType = "CC";
+                pumpStateTimer = 0;
+
                 pumpStateTimer = millis();
                 previousPumpState = PUMP_SELECT_PAYMENT;
             }
             
-            if(millis() - pumpStateTimer > 3000){
-                paymentType = "CC";
-                pumpStateTimer = 0;
-                currentPumpState = PUMP_SELECT_AMOUNT;
-            }
             break;
         }
         case PUMP_SELECT_AMOUNT:{
@@ -100,49 +97,121 @@ void HandlePumpState() {
                 load_amount_selection_screen();
                 Serial.println("Affichage choix amount");
 
+                amount = 100.0;
+                pumpStateTimer = 0;
+
                 pumpStateTimer = millis();
                 previousPumpState = PUMP_SELECT_AMOUNT;
             }
             
-            if(millis() - pumpStateTimer > 3000){
-                amount = 100.0;
-                pumpStateTimer = 0;
-                currentPumpState = PUMP_WAITING_PIN;
-            }
             break;
         }
         case PUMP_WAITING_PIN:{
+            static char pin_enter[5] = "";
+            static int number_pin_enter = 0;
 
             if(previousPumpState != PUMP_WAITING_PIN){
                 load_pin_screen();
-                Serial.println("Action: Affichage 'Insérez carte'");
                 //sendStartTransactionAuthPacket(fuelType, paymentType, amount);
+                Serial.println("Action: Affichage PIN");
+
+                number_pin_enter = 0;
+                pin_enter[0] = '\0';
+
+                lv_label_set_text(pin_label, "_   _   _   _");
 
                 pumpStateTimer = millis();
-
                 previousPumpState = PUMP_WAITING_PIN;
             }
-            
+
             char key = keypad.getKey();
 
-            if (key) {
-                Serial.print("Touche : ");
-                Serial.println(key);
+            if(key){
 
-                //handleKey(key); // ta logique PIN
+                if(key == '*'){  
+                    number_pin_enter = 0;
+                    pin_enter[0] = '\0';
+                    lv_label_set_text(pin_label, "_   _   _   _");
+                    return;
+                }
+
+                if(key >= '0' && key <= '9' && number_pin_enter < 4){
+
+                    pin_enter[number_pin_enter] = key;
+                    number_pin_enter++;
+                    pin_enter[number_pin_enter] = '\0';
+
+                    char buffer[32];
+
+                    if(number_pin_enter == 1) snprintf(buffer,sizeof(buffer),"%c   _   _   _",pin_enter[0]);
+                    if(number_pin_enter == 2) snprintf(buffer,sizeof(buffer),"%c   %c   _   _",pin_enter[0],pin_enter[1]);
+                    if(number_pin_enter == 3) snprintf(buffer,sizeof(buffer),"%c   %c   %c   _",pin_enter[0],pin_enter[1],pin_enter[2]);
+                    if(number_pin_enter == 4) snprintf(buffer,sizeof(buffer),"%c   %c   %c   %c",pin_enter[0],pin_enter[1],pin_enter[2],pin_enter[3]);
+
+                    lv_label_set_text(pin_label, buffer);
+
+                    if(number_pin_enter == 4){
+                        Serial.print("PIN entered: ");
+                        Serial.println(pin_enter);
+
+                        currentPumpState = PUMP_VERIFY_PIN;
+                    }
+                }
             }
 
-            // currentPumpState = PUMP_DELAY;
-            // pumpDelay = 2000;
-            // pumpDelayNextCurrentPumpState = PUMP_WAITING_AUTH;
+            break;
+        }
+       case PUMP_VERIFY_PIN:{
+            static unsigned long verifyTimer = 0;
+            static bool verifyStarted = false;
+            static int pinAttempts = 0;
+
+            if(previousPumpState != PUMP_VERIFY_PIN){
+                load_verify_pin();
+                Serial.println("Verification du PIN...");
+
+                verifyTimer = millis();
+                verifyStarted = true;
+
+                previousPumpState = PUMP_VERIFY_PIN;
+            }
+
+            if(verifyStarted && millis() - verifyTimer > 2000){
+
+                bool isPinValid = true; // simulation
+
+                if(isPinValid){
+                    Serial.println("PIN correct");
+                    pinAttempts = 0;
+                    currentPumpState = PUMP_WAITING_AUTH;
+                }
+                else{
+                    pinAttempts++;
+                    Serial.println("PIN incorrect");
+
+                    if(pinAttempts >= 3){
+                        Serial.println("3 erreurs PIN -> retour accueil");
+                        pinAttempts = 0;
+                        currentPumpState = PUMP_IDLE;
+                    }
+                    else{
+                        Serial.println("Reessayer PIN");
+                        currentPumpState = PUMP_WAITING_PIN;
+                    }
+                }
+
+                verifyStarted = false;
+            }
+
             break;
         }
         case PUMP_WAITING_AUTH:{
-            if(previousPumpState != PUMP_WAITING_AUTH){
+            /*if(previousPumpState != PUMP_WAITING_AUTH){
                 load_waiting_auth_screen();
                 pumpStateTimer = millis();
                 previousPumpState = PUMP_WAITING_AUTH;
-            }
+            }*/
+            currentPumpState = PUMP_READY_TO_FUEL;
             break;
         }
 
@@ -171,6 +240,8 @@ void HandlePumpState() {
 
             // Si signal HIGH = débit
             if(digitalRead(DIS) == HIGH){
+                ledcWrite(PWM_CHANNEL_R, 150);
+                ledcWrite(PWM_CHANNEL_L, 0);
 
                 lastFlowTime = millis();
 
@@ -186,6 +257,9 @@ void HandlePumpState() {
                     if(percent > 100) percent = 100;
                     lv_bar_set_value(progress_bar, percent, LV_ANIM_OFF);
                 }
+            } else {
+                ledcWrite(PWM_CHANNEL_R, 0);
+                ledcWrite(PWM_CHANNEL_L, 0);
             }
 
             // Si plus de débit depuis 4 secondes
@@ -264,6 +338,8 @@ void HandlePumpState() {
             }
 
             break;
+        } case PUMP_HS: {
+            load_hs_screen();
         }
         default:{
             break;
