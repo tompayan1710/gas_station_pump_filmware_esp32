@@ -9,7 +9,7 @@
 #include "../Ui/Screen_Home.h"
 #include "../Ui/Screen_Fuel_Selection.h"
 #include "../Ui/Screen_Payment_Type.h"
-#include "../Ui/Screen_Payment_Amount.h"
+#include "../Ui/Screen_Insert_Card.h"
 #include "../Ui/Screen_PIN.h"
 #include "../Ui/Screen_Verify_Pin.h"
 #include "../Ui/Screen_Transaction_Waiting_Auth.h"
@@ -108,26 +108,20 @@ void HandlePumpState() {
             if(previousPumpState != PUMP_SELECT_PAYMENT && currentPumpState == PUMP_SELECT_PAYMENT){
                 load_payment_type_screen();
                 Serial.println("Affichage choix carte");
-
-                paymentType = "CC";
-                pumpStateTimer = 0;
-
-                pumpStateTimer = millis();
                 previousPumpState = PUMP_SELECT_PAYMENT;
             }
             
             break;
         }
-        case PUMP_SELECT_AMOUNT:{
-            if(previousPumpState != PUMP_SELECT_AMOUNT && currentPumpState == PUMP_SELECT_AMOUNT){
-                load_amount_selection_screen();
-                Serial.println("Affichage choix amount");
-
-                amount = 100.0;
-                pumpStateTimer = 0;
+        case PUMP_INSERT_CARD:{
+            if(previousPumpState != PUMP_INSERT_CARD && currentPumpState == PUMP_INSERT_CARD){
+                load_insert_card_screen();
+                Serial.println("Affichage PUMP_INSERT_CARD");
 
                 pumpStateTimer = millis();
-                previousPumpState = PUMP_SELECT_AMOUNT;
+                previousPumpState = PUMP_INSERT_CARD;
+            } if(millis() - pumpStateTimer > 4000){
+                currentPumpState = PUMP_WAITING_PIN;
             }
             
             break;

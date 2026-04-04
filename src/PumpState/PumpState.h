@@ -7,7 +7,7 @@ enum PumpState {
     PUMP_IDLE,            // Écran d'accueil "Bienvenue"
     PUMP_SELECT_PAYMENT,
     PUMP_SELECT_FUEL,     // Choix du type : Diesel, SP95, etc.
-    PUMP_SELECT_AMOUNT,   // Choix du montant max (ex: 100€)
+    PUMP_INSERT_CARD,   // insertion carte
     PUMP_WAITING_PIN, // Lecture de la carte / insertion PIN
     PUMP_VERIFY_PIN,
     PUMP_WAITING_AUTH,    // Communication avec le serveur C#

@@ -59,8 +59,8 @@ static lv_obj_t* create_fuel_button(lv_obj_t * parent,
     lv_obj_remove_style_all(header);
     lv_obj_set_size(header, LV_PCT(100), 40);
     lv_obj_set_style_bg_color(header, color, 0);
-    lv_obj_set_style_bg_grad_color(header, lv_color_darken(color, 40), 0);
-    lv_obj_set_style_bg_grad_dir(header, LV_GRAD_DIR_HOR, 0);
+    // lv_obj_set_style_bg_grad_color(header, lv_color_darken(color, 40), 0);
+    // lv_obj_set_style_bg_grad_dir(header, LV_GRAD_DIR_HOR, 0);
     lv_obj_set_style_bg_opa(header, LV_OPA_COVER, 0);
 
     lv_obj_t * name_label = lv_label_create(header);
@@ -81,7 +81,7 @@ static lv_obj_t* create_fuel_button(lv_obj_t * parent,
 
     lv_obj_t * top = lv_obj_create(body);
     lv_obj_remove_style_all(top);
-    lv_obj_set_size(top, LV_PCT(100), 100); // limite haute
+    lv_obj_set_size(top, LV_PCT(100), 120); // limite haute
     lv_obj_clear_flag(top, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_flex_flow(top, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(top,
@@ -147,7 +147,7 @@ void load_fuel_selection_screen()
 {
     lv_obj_t * screen = lv_obj_create(NULL);
     lv_obj_remove_style_all(screen);
-    lv_obj_set_style_bg_color(screen, COLOR_BG, 0);
+    lv_obj_set_style_bg_color(screen, COLOR_WHITE_BG, 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
 
     // Container principal en COLONNE (titre + boutons), tout centré
@@ -202,7 +202,7 @@ void load_fuel_selection_screen()
         "Octane 95",
         "Voitures essence",
         priceSP95Str,
-        "Ce carburant contient jusqu'a 10% de biocarburants (ethanol)",
+        "Ce carburant contient jusqu'a 10% de biocarburants",
         COLOR_SP95,
         "SP95");
 

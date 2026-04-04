@@ -28,7 +28,7 @@ void load_insert_card_screen() {
     lv_obj_t * screen = lv_obj_create(NULL);
 
     //lv_obj_remove_style_all(screen);
-    lv_obj_set_style_bg_color(screen, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_bg_color(screen, COLOR_WHITE_BG, 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
 
     lv_obj_t * main_cont = lv_obj_create(screen);
@@ -42,7 +42,7 @@ void load_insert_card_screen() {
     lv_obj_t * title = lv_label_create(main_cont);
     lv_label_set_text(title, "INSERER CARTE");
     lv_obj_set_style_text_font(title, &lv_font_montserrat_20, 0);
-    lv_obj_set_style_text_color(title, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_text_color(title, COLOR_PRIMARY_TEXT, 0);
 
     // Points animés
     dots_label = lv_label_create(main_cont);
@@ -55,7 +55,7 @@ void load_insert_card_screen() {
     lv_obj_set_size(img, 117, 100);
 
     // Timer animation
-    lv_timer_create(dots_anim_cb, 1000, NULL);
+    lv_timer_create(dots_anim_cb, 1500, NULL);
 
     lv_scr_load_anim(screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true);
 }

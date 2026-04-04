@@ -21,7 +21,7 @@ void load_home_screen()
 {
     lv_obj_t * screen_home = lv_obj_create(NULL);
     lv_obj_remove_style_all(screen_home);
-    lv_obj_set_style_bg_color(screen_home, COLOR_BG, 0);
+    lv_obj_set_style_bg_color(screen_home, COLOR_WHITE_BG, 0);
     lv_obj_set_style_bg_opa(screen_home, LV_OPA_COVER, 0);
 
     lv_obj_t * container = lv_obj_create(screen_home);
@@ -48,7 +48,7 @@ void load_home_screen()
     lv_obj_remove_style_all(btn);
     lv_obj_set_size(btn, 180, 55);
 
-    lv_obj_set_style_bg_color(btn, lv_color_hex(0xFAFAFA), 0);
+    lv_obj_set_style_bg_color(btn, COLOR_GREY_BG, 0);
     lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, 0);
     lv_obj_set_style_radius(btn, 10, 0);
 
