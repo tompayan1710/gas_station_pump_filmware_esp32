@@ -64,7 +64,7 @@ void setup() {
     }
     Serial.println("=== Fin scan ===");*/
     // ======================================================
-
+    WiFi.setTxPower(WIFI_POWER_8_5dBm);
     currentSystemState = SYS_WIFI_CONNECTING;
 
     ledcSetup(PWM_CHANNEL_R, PWM_FREQ, PWM_RESOLUTION);
@@ -82,7 +82,9 @@ void setup() {
 void loop() {
     webSocket.loop();
 
+    
     handleSystemState();
+    
     HandlePumpState();
 
     lv_tick_inc(5);      // <-- AJOUT CRITIQUE

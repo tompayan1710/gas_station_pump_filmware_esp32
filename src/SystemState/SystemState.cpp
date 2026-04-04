@@ -19,6 +19,7 @@ void handleSystemState(){
                 if(wifi_label) lv_label_set_text(wifi_label, "WiFi: Connexion...");
                 Serial.println("Connecting WiFi...");
                 WiFi.mode(WIFI_STA);
+                // Serial.println("WiFi skipped");
                 WiFi.begin("iphonetom", "345566778");
                 previousSystemState = SYS_WIFI_CONNECTING;
                 lastCheck = 0;
