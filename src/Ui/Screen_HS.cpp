@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <lvgl.h>
 
+/*
 LV_IMG_DECLARE(img_hs)
 
 void load_hs_screen() {
@@ -34,6 +35,26 @@ void load_hs_screen() {
     lv_obj_set_style_text_font(subtitle, &lv_font_montserrat_14, 0);
     lv_obj_set_style_text_color(subtitle, lv_color_hex(0x6B7280), 0);
 
+
+    lv_scr_load(screen);
+}*/
+
+
+void load_hs_screen() {
+    lv_obj_t * screen = lv_obj_create(NULL);
+    lv_obj_remove_style_all(screen);
+
+    lv_obj_set_style_bg_color(screen, lv_color_hex(0xFF0000), 0);
+    lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
+
+    lv_obj_t * label = lv_label_create(screen);
+
+    lv_label_set_text(label, "POMPE HS");
+
+    lv_obj_set_style_text_font(label, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), 0);
+
+    lv_obj_center(label);
 
     lv_scr_load(screen);
 }

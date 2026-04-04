@@ -100,7 +100,21 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
                 }*/
                 previousSystemState = SYS_REGISTERING;
                 currentSystemState = SYS_REGISTERING;
-            }else if(strcmp(typeMsg, "TRANSACTION_AUTH_OK") == 0){
+            }else if(strcmp(typeMsg, "CARBURANT_PRICE") == 0){
+
+                const char* sku = doc["payload"]["sku"];
+                float prix = doc["payload"]["prix"];
+
+                Serial.printf("Prix reçu %s : %.2f\n", sku, prix);
+
+                if(strcasecmp(sku, "SP95") == 0){
+                    price_SP95 = prix;
+                }
+                else if(strcasecmp(sku, "DIESEL") == 0){
+                    price_DIESEL = prix;
+                }
+            }
+            else if(strcmp(typeMsg, "TRANSACTION_AUTH_OK") == 0){
                 JsonObject payloadObj = doc["payload"];
                 const char *id_transaction = payloadObj["transaction_id"];
 
@@ -135,11 +149,27 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
                 Serial.print("PUMP_TOGGLE status : ");
                 Serial.println(status);
 
-                if(strcmp(status, "Disponible")){
+                if(strcmp(status, "Disponible") == 0){
                     currentPumpState = PUMP_IDLE;
-                }else if(strcmp(status, "Hors_Service")){
+                }
+                else if(strcmp(status, "Hors_Service") == 0){
+                    should_broadcast_HS = false;
                     currentPumpState = PUMP_HS;
                 }
+            }
+
+
+
+            //Erreur Code
+            else if(strcmp(typeMsg, "CARBURANT_PRICE_ERROR") == 0){
+
+                const char* message = doc["payload"]["message"];
+
+                Serial.print("Erreur carburant: ");
+                Serial.println(message);
+
+                should_broadcast_HS = true;
+                currentPumpState = PUMP_HS;
             }
             break;
         }
@@ -168,6 +198,36 @@ void sendRegistrationPacket(){
 
     Serial.println("Envoi IDENTIFY");
     webSocket.sendTXT(output);
+}
+
+
+void requestFuelPrices()
+{
+    // SP95
+    {
+        StaticJsonDocument<128> doc;
+        doc["type"] = "GET_CARBURANT_PRICE";
+
+        JsonObject payload = doc.createNestedObject("payload");
+        payload["sku"] = "SP95";
+
+        String json;
+        serializeJson(doc, json);
+        webSocket.sendTXT(json);
+    }
+
+    // DIESEL
+    {
+        StaticJsonDocument<128> doc;
+        doc["type"] = "GET_CARBURANT_PRICE";
+
+        JsonObject payload = doc.createNestedObject("payload");
+        payload["sku"] = "Diesel";
+
+        String json;
+        serializeJson(doc, json);
+        webSocket.sendTXT(json);
+    }
 }
 
 void sendStartTransactionAuthPacket(const char* fuelType, const char* paymentType, float amount){
@@ -200,4 +260,18 @@ void sendTransactionCompletePacket(const char* transactionId, float liters){
     serializeJson(doc, output);
 
     webSocket.sendTXT(output);
+}
+
+void broadcastPumpStatus(const char *status)
+{
+    StaticJsonDocument<128> doc;
+    doc["type"] = "PUMP_STATUS_EQUIPMENT_UPDATE";
+
+    JsonObject payload = doc.createNestedObject("payload");
+    payload["mac"] = WiFi.macAddress();
+    payload["status"] = status;
+
+    String json;
+    serializeJson(doc, json);
+    webSocket.sendTXT(json);
 }

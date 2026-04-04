@@ -29,5 +29,14 @@ extern PumpState pumpDelayNextCurrentPumpState;
 
 extern String currentTransactionId;
 
+extern float price_SP95;
+extern float price_DIESEL;
+
+extern const char* fuelType;
+extern float price_per_liter;
+extern float amount;
+extern const char* paymentType;
+extern bool should_broadcast_HS;
+
 void HandlePumpState();
 void HandlePumpLoopingState();

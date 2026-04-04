@@ -17,9 +17,16 @@ void setup() {
     Serial.begin(115200);
     delay(1000);
 
+    pinMode(2, OUTPUT);
+    digitalWrite(2, LOW);
+    delay(50);
+    digitalWrite(2, HIGH);
+    delay(50);
+
 
     tft.init();
-    tft.setRotation(1);
+    // tft.setRotation(1);
+    tft.setRotation(3);
 
     tft.setSwapBytes(true);
 
@@ -38,6 +45,7 @@ void setup() {
         NULL,
         sizeof(lv_color_t) * LVGL_BUFFER_SIZE,
         LV_DISPLAY_RENDER_MODE_PARTIAL
+        // LV_DISPLAY_RENDER_MODE_FULL
     );
 
     lv_indev_t * indev = lv_indev_create();

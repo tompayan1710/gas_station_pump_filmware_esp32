@@ -25,8 +25,8 @@ LGFX::LGFX(void) {
         cfg.pin_miso = 19;
         cfg.pin_dc = 17;
 
-        cfg.freq_write = 20000000;
-        cfg.freq_read  = 16000000;
+        cfg.freq_write = 10000000;
+        cfg.freq_read  = 8000000;
 
         _bus_instance.config(cfg);
         _panel_instance.setBus(&_bus_instance);
@@ -45,7 +45,8 @@ LGFX::LGFX(void) {
 
         cfg.offset_x = 0;
         cfg.offset_y = 0;
-
+        
+        // cfg.dlen_16bit = false;
         cfg.rgb_order = false;
         cfg.bus_shared = true;
 
@@ -89,6 +90,7 @@ LGFX::LGFX(void) {
     lv_display_flush_ready(disp);
 }*/
 
+/*
 void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
 {
     uint32_t w = area->x2 - area->x1 + 1;
@@ -99,6 +101,38 @@ void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map
     tft.setAddrWindow(area->x1, area->y1, w, h);
     tft.pushPixels((uint16_t*)px_map, w * h);
 
+    tft.endWrite();
+
+    lv_display_flush_ready(disp);
+}*/
+
+/*
+void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
+{
+    uint32_t w = area->x2 - area->x1 + 1;
+    uint32_t h = area->y2 - area->y1 + 1;
+
+    tft.startWrite();
+    tft.pushImageDMA(
+        area->x1,
+        area->y1,
+        w,
+        h,
+        (uint16_t*)px_map
+    );
+    tft.endWrite();
+
+    lv_display_flush_ready(disp);
+}*/
+
+void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
+{
+    uint32_t w = area->x2 - area->x1 + 1;
+    uint32_t h = area->y2 - area->y1 + 1;
+
+    tft.startWrite();
+    tft.setAddrWindow(area->x1, area->y1, w, h);
+    tft.pushPixels((uint16_t*)px_map, w * h);
     tft.endWrite();
 
     lv_display_flush_ready(disp);
@@ -159,7 +193,7 @@ void my_touch_read(lv_indev_t * indev, lv_indev_data_t * data)
     if (tft.getTouch(&x, &y))
     {
         data->state = LV_INDEV_STATE_PRESSED;
-        data->point.x = x;
+        data->point.x = 480 - x;
         data->point.y = y;
     }
     else

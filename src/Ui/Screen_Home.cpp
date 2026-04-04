@@ -21,7 +21,7 @@ void load_home_screen()
 {
     lv_obj_t * screen_home = lv_obj_create(NULL);
     lv_obj_remove_style_all(screen_home);
-    lv_obj_set_style_bg_color(screen_home, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_bg_color(screen_home, COLOR_BG, 0);
     lv_obj_set_style_bg_opa(screen_home, LV_OPA_COVER, 0);
 
     lv_obj_t * container = lv_obj_create(screen_home);
@@ -40,7 +40,7 @@ void load_home_screen()
     lv_obj_t * label = lv_label_create(container);
     lv_label_set_text(label, "Bienvenue");
     lv_obj_set_style_text_font(label, &font_playfair_display_1bpp, 0);
-    lv_obj_set_style_text_color(label, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_text_color(label, COLOR_PRIMARY_TEXT, 0);
     lv_obj_set_style_pad_bottom(label, 80, 0);
 
     // Bouton démarrer
@@ -56,7 +56,7 @@ void load_home_screen()
 
     lv_obj_t * btn_label = lv_label_create(btn);
     lv_label_set_text(btn_label, "COMMENCER");
-    lv_obj_set_style_text_color(btn_label, lv_color_hex(0x111111), 0);
+    lv_obj_set_style_text_color(btn_label, COLOR_PRIMARY_TEXT, 0);
     lv_obj_center(btn_label);
 
     // Texte encadrement en bas à droite

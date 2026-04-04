@@ -30,16 +30,22 @@ PumpState pumpDelayNextCurrentPumpState;
 String currentTransactionId = "";
 
 
+float price_SP95 = -1.0;
+float price_DIESEL = -1.0;
+
+const char *fuelType = "";
+float price_per_liter = 0.0;
+float amount = 0.0;
+const char *paymentType = "";
+
+bool should_broadcast_HS = false;
+
 void HandlePumpState() {
-
-    static const char *fuelType;
-    static float price_per_liter;
-    static float amount;
-    static const char *paymentType;
-
     static float liters = 0.0;
     static unsigned long lastFlowTime = 0;
     static unsigned long lastUpdateTime = 0;
+
+    static bool fuelScreenLoaded = false;
 
     switch (currentPumpState) {
         case PUMP_IDLE:{
@@ -64,16 +70,36 @@ void HandlePumpState() {
             break;
         }
         case PUMP_SELECT_FUEL:{
-            if(previousPumpState != PUMP_SELECT_FUEL && currentPumpState == PUMP_SELECT_FUEL){
-                load_fuel_selection_screen();
-                Serial.println("Affichage choix carburant");
+            if(previousPumpState != PUMP_SELECT_FUEL){
 
-                fuelType = "SP95";
-                price_per_liter = 1.24;
-                pumpStateTimer = 0;
-
+                requestFuelPrices();
                 pumpStateTimer = millis();
+
                 previousPumpState = PUMP_SELECT_FUEL;
+            }
+
+            // OK → afficher UNE SEULE FOIS puis sortir du state
+            if(price_SP95 > 0 && price_DIESEL > 0 && !fuelScreenLoaded){
+
+                
+                Serial.println("Prix OK → affichage");
+                
+                load_fuel_selection_screen();
+                fuelScreenLoaded = true;
+
+                previousPumpState = PUMP_SELECT_FUEL;
+
+                // 🔥 ON RESTE dans cet état sans recharger
+                break;
+            }
+
+            // TIMEOUT uniquement si PAS reçu
+            if(price_SP95 <= 0 || price_DIESEL <= 0){
+                if(millis() - pumpStateTimer > 5000){
+                    Serial.println("Timeout prix carburant");
+                    should_broadcast_HS = true;
+                    currentPumpState = PUMP_HS;
+                }
             }
 
             break;
@@ -339,7 +365,14 @@ void HandlePumpState() {
 
             break;
         } case PUMP_HS: {
-            load_hs_screen();
+            if(previousPumpState != PUMP_HS){
+                if(should_broadcast_HS){
+                    broadcastPumpStatus("Hors_Service");
+                }
+                load_hs_screen();
+                previousPumpState = PUMP_HS;
+            }
+            break;
         }
         default:{
             break;
