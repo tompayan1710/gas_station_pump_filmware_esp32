@@ -1,13 +1,15 @@
 #include <Arduino.h>
 #include <lvgl.h>
 
+#include "./Ui_Manager.h"
+
 /*
 LV_IMG_DECLARE(img_hs)
 
 void load_hs_screen() {
     lv_obj_t * screen = lv_obj_create(NULL);
     lv_obj_remove_style_all(screen);
-    lv_obj_set_style_bg_color(screen, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_bg_color(screen, COLOR_WHITE_BG, 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
 
     lv_obj_t * main_cont = lv_obj_create(screen);
@@ -44,7 +46,7 @@ void load_hs_screen() {
     lv_obj_t * screen = lv_obj_create(NULL);
     lv_obj_remove_style_all(screen);
 
-    lv_obj_set_style_bg_color(screen, lv_color_hex(0xFF0000), 0);
+    lv_obj_set_style_bg_color(screen, COLOR_RED, 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
 
     lv_obj_t * label = lv_label_create(screen);
@@ -52,7 +54,7 @@ void load_hs_screen() {
     lv_label_set_text(label, "POMPE HS");
 
     lv_obj_set_style_text_font(label, &lv_font_montserrat_24, 0);
-    lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_color(label, COLOR_WHITE_BG, 0);
 
     lv_obj_center(label);
 

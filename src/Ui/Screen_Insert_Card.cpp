@@ -52,7 +52,7 @@ void load_insert_card_screen() {
     // Image
     lv_obj_t * img = lv_img_create(main_cont);
     lv_img_set_src(img, &insert_card);
-    lv_obj_set_size(img, 117, 100);
+    lv_obj_set_size(img, 82, 70);
 
     // Timer animation
     lv_timer_create(dots_anim_cb, 1500, NULL);

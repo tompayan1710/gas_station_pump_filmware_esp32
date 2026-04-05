@@ -25,8 +25,8 @@ LGFX::LGFX(void) {
         cfg.pin_miso = 19;
         cfg.pin_dc = 17;
 
-        cfg.freq_write = 10000000;
-        cfg.freq_read  = 8000000;
+        cfg.freq_write = 20000000;
+        cfg.freq_read  = 16000000;
 
         _bus_instance.config(cfg);
         _panel_instance.setBus(&_bus_instance);
@@ -35,7 +35,7 @@ LGFX::LGFX(void) {
         auto cfg = _panel_instance.config();
 
         cfg.pin_cs  = 5;
-        cfg.pin_rst = 2;
+        cfg.pin_rst = 15;
 
         cfg.panel_width  = 320;
         cfg.panel_height = 480;
@@ -159,29 +159,29 @@ void ui_init() {
 
 
     wifi_label = lv_label_create(lv_scr_act());
-    lv_obj_set_style_text_color(wifi_label, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_color(wifi_label, COLOR_WHITE_BG, 0);
     lv_obj_align(wifi_label, LV_ALIGN_CENTER, 0, -20);
     lv_label_set_text(wifi_label, "WiFi: En attente...");
 
 
     websocket_label = lv_label_create(lv_scr_act());
-    lv_obj_set_style_text_color(websocket_label, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_color(websocket_label, COLOR_WHITE_BG, 0);
     lv_obj_align(websocket_label, LV_ALIGN_CENTER, 0, 00);
     lv_label_set_text(websocket_label, "WS: En attente");
 
     // ... tes autres labels ...
     db_label = lv_label_create(lv_scr_act());
-    lv_obj_set_style_text_color(db_label, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_color(db_label, COLOR_WHITE_BG, 0);
     lv_obj_align(db_label, LV_ALIGN_CENTER, 0, 20); // Placé un peu plus bas
     lv_label_set_text(db_label, "DB: En attente");
 
     system_label = lv_label_create(lv_scr_act());
-    lv_obj_set_style_text_color(system_label, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_color(system_label, COLOR_WHITE_BG, 0);
     lv_obj_align(system_label, LV_ALIGN_CENTER, 0, 40); // Placé un peu plus bas
     lv_label_set_text(system_label, "Systeme : Non fonctionnel");
 
     network_message_label = lv_label_create(lv_scr_act());
-    lv_obj_set_style_text_color(network_message_label, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_color(network_message_label, COLOR_WHITE_BG, 0);
     lv_obj_align(network_message_label, LV_ALIGN_CENTER, 0, 60); // Placé un peu plus bas
     lv_label_set_text(network_message_label, "aucun message");
 }

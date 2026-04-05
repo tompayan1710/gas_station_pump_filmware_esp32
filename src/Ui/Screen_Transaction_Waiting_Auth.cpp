@@ -1,12 +1,14 @@
 #include <lvgl.h>
 
+#include "./Ui_Manager.h"
+
 static lv_obj_t * spinner_obj = nullptr;
 
 void load_waiting_auth_screen() {
 
     lv_obj_t * screen = lv_obj_create(NULL);
     lv_obj_remove_style_all(screen);
-    lv_obj_set_style_bg_color(screen, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_bg_color(screen, COLOR_WHITE_BG, 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
 
     lv_obj_t * cont = lv_obj_create(screen);

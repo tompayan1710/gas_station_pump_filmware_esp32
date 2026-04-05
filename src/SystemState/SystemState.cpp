@@ -79,11 +79,11 @@ void handleSystemState(){
                     Serial.println("Critical timeout - Resetting WS");
                     if(db_label){
                         lv_label_set_text(db_label, "Erreur: Timeout BD");
-                        lv_obj_set_style_text_color(db_label, lv_color_hex(0xffffff), 0);
+                        lv_obj_set_style_text_color(db_label, COLOR_WHITE_BG, 0);
                     }
                     if(websocket_label){
                         lv_label_set_text(websocket_label, "WS: En attente");
-                         lv_obj_set_style_text_color(websocket_label, lv_color_hex(0xffffff), 0);
+                         lv_obj_set_style_text_color(websocket_label, COLOR_WHITE_BG, 0);
                     }
                     previousSystemState = SYS_BOOT; 
                     currentSystemState = SYS_WS_CONNECTING;

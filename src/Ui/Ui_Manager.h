@@ -43,6 +43,11 @@ void my_touch_read(lv_indev_t *indev, lv_indev_data_t *data);
 #define COLOR_WHITE_TEXT lv_color_hex(0xFFFFFF)
 #define COLOR_WHITE_BG lv_color_hex(0xFFFFFF)
 #define COLOR_GREY_BG lv_color_hex(0xFAFAFA)
+#define COLOR_GREY_BORDER lv_color_hex(0xE5E7EB)
 
 #define COLOR_DIESEL lv_color_hex(0xFFE347)
 #define COLOR_SP95 lv_color_hex(0x2DD86C)
+
+#define COLOR_RED lv_color_hex(0xDE190A)
+#define COLOR_BLUE lv_color_hex(0x0A1FDE)
+#define COLOR_GREEN lv_color_hex(0x25EB2F)

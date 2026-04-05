@@ -39,7 +39,7 @@ static lv_obj_t* create_fuel_button(lv_obj_t * parent,
     lv_obj_t * btn = lv_btn_create(parent);
     lv_obj_remove_style_all(btn);
     lv_obj_set_size(btn, 180, 210);
-    lv_obj_set_style_bg_color(btn, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_bg_color(btn, COLOR_WHITE_BG, 0);
     lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, 0);
     lv_obj_set_style_radius(btn, 10, 0);
     lv_obj_set_style_border_width(btn, 1, 0);
