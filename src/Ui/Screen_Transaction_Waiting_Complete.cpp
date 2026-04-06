@@ -1,3 +1,4 @@
+/*
 #include <lvgl.h>
 #include <cstdio>
 #include "./Ui_Manager.h"
@@ -65,4 +66,83 @@ void load_transaction_waiting_complete_screen(float totalLiters, float pricePerL
     lv_obj_set_style_text_color(subtitle, COLOR_SECONDARY_TEXT, 0);
 
     lv_scr_load(screen);
+}
+*/
+
+#include <lvgl.h>
+#include <cstdio>
+#include "./Ui_Manager.h"
+
+// Animation taille cercle
+static void anim_size_cb(void * obj, int32_t v) {
+    lv_obj_set_size((lv_obj_t *)obj, v, v);
+}
+
+// Animation opacité check
+static void anim_opa_cb(void * obj, int32_t v) {
+    lv_obj_set_style_opa((lv_obj_t *)obj, v, 0);
+}
+
+void load_transaction_waiting_complete_screen(float totalLiters, float pricePerLiter, float totalPrice) {
+
+    lv_obj_t * screen = lv_obj_create(NULL);
+    lv_obj_remove_style_all(screen);
+    lv_obj_set_style_bg_color(screen, COLOR_WHITE_BG, 0);
+    lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
+
+    lv_obj_t * cont = lv_obj_create(screen);
+    lv_obj_remove_style_all(cont);
+    lv_obj_set_size(cont, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_gap(cont, 20, 0);
+
+    // Titre
+    lv_obj_t * title = lv_label_create(cont);
+    lv_label_set_text(title, "PAIEMENT EN COURS...");
+    lv_obj_set_style_text_font(title, &lv_font_montserrat_20, 0);
+    lv_obj_set_style_text_color(title, COLOR_PRIMARY_TEXT, 0);
+
+    // Cercle de validation
+    lv_obj_t * circle = lv_obj_create(cont);
+    lv_obj_set_size(circle, 20, 20);
+    lv_obj_set_style_radius(circle, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_color(circle, COLOR_GREEN, 0);
+    lv_obj_set_style_border_width(circle, 0, 0);
+
+    // Icône check (cachée)
+    lv_obj_t * check = lv_label_create(circle);
+    lv_label_set_text(check, LV_SYMBOL_OK);
+    lv_obj_set_style_text_font(check, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_color(check, lv_color_white(), 0);
+    lv_obj_center(check);
+    lv_obj_set_style_opa(check, LV_OPA_TRANSP, 0);
+
+    // Texte
+    lv_obj_t * subtitle = lv_label_create(cont);
+    lv_label_set_text(subtitle, "Validation du paiement...");
+    lv_obj_set_style_text_font(subtitle, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(subtitle, COLOR_SECONDARY_TEXT, 0);
+
+    lv_scr_load(screen);
+
+    // Animation cercle (grossissement)
+    lv_anim_t a;
+    lv_anim_init(&a);
+    lv_anim_set_var(&a, circle);
+    lv_anim_set_values(&a, 20, 80);
+    lv_anim_set_time(&a, 400);
+    lv_anim_set_exec_cb(&a, anim_size_cb);
+    lv_anim_set_path_cb(&a, lv_anim_path_overshoot);
+    lv_anim_start(&a);
+
+    // Animation apparition check
+    lv_anim_t a2;
+    lv_anim_init(&a2);
+    lv_anim_set_var(&a2, check);
+    lv_anim_set_values(&a2, LV_OPA_TRANSP, LV_OPA_COVER);
+    lv_anim_set_time(&a2, 200);
+    lv_anim_set_delay(&a2, 300);
+    lv_anim_set_exec_cb(&a2, anim_opa_cb);
+    lv_anim_start(&a2);
 }

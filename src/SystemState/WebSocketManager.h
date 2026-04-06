@@ -10,6 +10,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
 void sendRegistrationPacket();
 
 void requestFuelPrices();
+void requestCarburantConfig();
 
 void sendStartTransactionAuthPacket(const char *fuelType, const char *paymentType, float amount);
 void sendTransactionCompletePacket(const char *transactionId, float liters);

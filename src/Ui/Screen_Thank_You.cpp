@@ -3,6 +3,7 @@
 
 #include "./Ui_Manager.h"
 
+/*
 void load_thank_you_screen(float totalLiters, float totalPrice) {
 
     lv_obj_t * screen = lv_obj_create(NULL);
@@ -72,6 +73,38 @@ void load_thank_you_screen(float totalLiters, float totalPrice) {
     lv_label_set_text(thanks, "Merci de votre visite !");
     lv_obj_set_style_text_font(thanks, &lv_font_montserrat_14, 0);
     lv_obj_set_style_text_color(thanks, lv_color_hex(0x6B7280), 0);
+
+    lv_scr_load(screen);
+}
+*/
+
+LV_IMG_DECLARE(goonstation_logo_horizontal); // <-- à mettre dans ton fichier image
+
+void load_thank_you_screen() {
+
+    lv_obj_t * screen = lv_obj_create(NULL);
+    lv_obj_remove_style_all(screen);
+    lv_obj_set_style_bg_color(screen, COLOR_WHITE_BG, 0);
+    lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
+
+    lv_obj_t * cont = lv_obj_create(screen);
+    lv_obj_remove_style_all(cont);
+    lv_obj_set_size(cont, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_gap(cont, 24, 0);
+
+    // Logo en haut
+    lv_obj_t * logo = lv_img_create(cont);
+    lv_img_set_src(logo, &goonstation_logo_horizontal);
+    lv_obj_set_size(logo, 200, LV_SIZE_CONTENT);
+
+    // Message principal
+    lv_obj_t * thanks = lv_label_create(cont);
+    lv_label_set_text(thanks, "Merci, au plaisir de vous revoir");
+    lv_obj_set_style_text_font(thanks, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(thanks, COLOR_PRIMARY_TEXT, 0);
+    lv_obj_set_style_text_align(thanks, LV_TEXT_ALIGN_CENTER, 0);
 
     lv_scr_load(screen);
 }

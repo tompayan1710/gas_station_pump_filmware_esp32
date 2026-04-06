@@ -1,5 +1,6 @@
 #include <lvgl.h>
 #include "./Ui_Manager.h"
+#include "../PumpState/PumpState.h"
 
 void load_progress_screen() {
 
@@ -24,7 +25,28 @@ void load_progress_screen() {
     progress_label = lv_label_create(cont);
     lv_label_set_text(progress_label, "0.00 L");
     lv_obj_set_style_text_font(progress_label, &lv_font_montserrat_24, 0);
-    lv_obj_set_style_text_color(progress_label, COLOR_GREEN, 0);
+    lv_obj_set_style_text_color(progress_label, COLOR_RED, 0);
+
+
+        // Prix HT
+    price_ht_label = lv_label_create(cont);
+    lv_label_set_text(price_ht_label, "HT: 0.00 EUR");
+    lv_obj_set_style_text_font(price_ht_label, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(price_ht_label, COLOR_PRIMARY_TEXT, 0);
+
+    // Prix TTC
+    price_ttc_label = lv_label_create(cont);
+    lv_label_set_text(price_ttc_label, "TTC: 0.00 EUR");
+    lv_obj_set_style_text_font(price_ttc_label, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(price_ttc_label, COLOR_GREEN, 0);
+
+    char buffer[64];
+    snprintf(buffer, sizeof(buffer), "Minimum: %.2f L", min_amount);
+
+    min_label = lv_label_create(cont);
+    lv_label_set_text(min_label, buffer);
+    lv_obj_set_style_text_font(min_label, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(min_label, COLOR_SECONDARY_TEXT, 0);
 
     // Barre de progression bleue
     progress_bar = lv_bar_create(cont);
@@ -36,6 +58,7 @@ void load_progress_screen() {
     lv_obj_set_style_radius(progress_bar, 8, LV_PART_MAIN);
     lv_obj_set_style_radius(progress_bar, 8, LV_PART_INDICATOR);
 
+    
     lv_obj_t * hint = lv_label_create(cont);
     lv_label_set_text(hint, "Raccrochez le pistolet pour terminer");
     lv_obj_set_style_text_font(hint, &lv_font_montserrat_14, 0);

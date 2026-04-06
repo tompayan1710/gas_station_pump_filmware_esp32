@@ -9,6 +9,9 @@ lv_obj_t * db_label = NULL;
 lv_obj_t * system_label = NULL;
 lv_obj_t * network_message_label = NULL;
 lv_obj_t * pin_label = NULL;
+lv_obj_t * min_label = NULL;
+lv_obj_t * price_ht_label = NULL;
+lv_obj_t * price_ttc_label = NULL;
 lv_obj_t * progress_label = NULL;
 lv_obj_t * progress_bar = NULL;
 
@@ -74,65 +77,16 @@ LGFX::LGFX(void) {
 }
 
 
-/* --- INTERFACE LVGL <-> LOVYANGFX --- */
-/*void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
+void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
 {
-    if (tft.getStartCount() == 0) tft.startWrite();
+    uint32_t w = area->x2 - area->x1 + 1;
+    uint32_t h = area->y2 - area->y1 + 1;
 
+    tft.startWrite();
     tft.pushImage(
-        area->x1,
-        area->y1,
-        area->x2 - area->x1 + 1,
-        area->y2 - area->y1 + 1,
-        (lgfx::rgb565_t*)px_map
+        area->x1, area->y1, w, h,
+        (lgfx::rgb565_t*)px_map  // ← Cast explicite RGB565
     );
-
-    lv_display_flush_ready(disp);
-}*/
-
-/*
-void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
-{
-    uint32_t w = area->x2 - area->x1 + 1;
-    uint32_t h = area->y2 - area->y1 + 1;
-
-    tft.startWrite();
-
-    tft.setAddrWindow(area->x1, area->y1, w, h);
-    tft.pushPixels((uint16_t*)px_map, w * h);
-
-    tft.endWrite();
-
-    lv_display_flush_ready(disp);
-}*/
-
-/*
-void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
-{
-    uint32_t w = area->x2 - area->x1 + 1;
-    uint32_t h = area->y2 - area->y1 + 1;
-
-    tft.startWrite();
-    tft.pushImageDMA(
-        area->x1,
-        area->y1,
-        w,
-        h,
-        (uint16_t*)px_map
-    );
-    tft.endWrite();
-
-    lv_display_flush_ready(disp);
-}*/
-
-void my_disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
-{
-    uint32_t w = area->x2 - area->x1 + 1;
-    uint32_t h = area->y2 - area->y1 + 1;
-
-    tft.startWrite();
-    tft.setAddrWindow(area->x1, area->y1, w, h);
-    tft.pushPixels((uint16_t*)px_map, w * h);
     tft.endWrite();
 
     lv_display_flush_ready(disp);
@@ -193,7 +147,9 @@ void my_touch_read(lv_indev_t * indev, lv_indev_data_t * data)
     if (tft.getTouch(&x, &y))
     {
         data->state = LV_INDEV_STATE_PRESSED;
-        data->point.x = 480 - x;
+        /*data->point.x = 480 - x;
+        data->point.y = y;*/
+        data->point.x = x;
         data->point.y = y;
     }
     else

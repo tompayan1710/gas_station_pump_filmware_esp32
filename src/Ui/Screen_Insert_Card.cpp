@@ -55,7 +55,8 @@ void load_insert_card_screen() {
     lv_obj_set_size(img, 82, 70);
 
     // Timer animation
-    lv_timer_create(dots_anim_cb, 1500, NULL);
+    lv_timer_t * timer = lv_timer_create(dots_anim_cb, 500, NULL);
+    lv_timer_ready(timer);
 
     lv_scr_load_anim(screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true);
 }

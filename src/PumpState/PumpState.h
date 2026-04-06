@@ -34,7 +34,10 @@ extern float price_DIESEL;
 
 extern const char* fuelType;
 extern float price_per_liter;
+extern float min_liter;
+extern float min_amount;
 extern float amount;
+
 extern const char* paymentType;
 extern bool should_broadcast_HS;
 

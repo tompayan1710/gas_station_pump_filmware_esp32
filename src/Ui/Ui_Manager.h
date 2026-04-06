@@ -1,7 +1,8 @@
 #pragma once
 
 #ifndef LVGL_BUFFER_SIZE
-#define LVGL_BUFFER_SIZE (480 * 6)
+#define LVGL_BUFFER_SIZE (480 * 10)
+
 #endif
 
 #include <LovyanGFX.hpp>
@@ -13,6 +14,11 @@ extern lv_obj_t * db_label;
 extern lv_obj_t * system_label;
 extern lv_obj_t * network_message_label;
 extern lv_obj_t * pin_label;
+extern lv_obj_t * min_label;
+
+extern lv_obj_t * price_ht_label;
+extern lv_obj_t * price_ttc_label;
+
 extern lv_obj_t * progress_label;
 extern lv_obj_t * progress_bar;
 
@@ -26,9 +32,6 @@ public:
 };
 
 extern LGFX tft;    
-
-//#define LVGL_BUFFER_SIZE (240 * 10)
-// #define LVGL_BUFFER_SIZE (480 * 6)
 
 extern lv_color_t buf[LVGL_BUFFER_SIZE];
 
@@ -48,6 +51,7 @@ void my_touch_read(lv_indev_t *indev, lv_indev_data_t *data);
 #define COLOR_DIESEL lv_color_hex(0xFFE347)
 #define COLOR_SP95 lv_color_hex(0x2DD86C)
 
-#define COLOR_RED lv_color_hex(0xDE190A)
+#define COLOR_RED lv_color_hex(0xFF675B)
 #define COLOR_BLUE lv_color_hex(0x0A1FDE)
 #define COLOR_GREEN lv_color_hex(0x25EB2F)
+#define COLOR_GREEN_BG lv_color_hex(0xEFFFF0)

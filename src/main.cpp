@@ -12,6 +12,10 @@
 #include "./SystemState/WebSocketManager.h"
 #include "./Ui/Ui_Manager.h"
 
+uint32_t my_tick_get_cb(void) {
+    return millis();
+}
+
 void setup() {
     currentSystemState = SYS_BOOT;
     Serial.begin(115200);
@@ -28,14 +32,21 @@ void setup() {
 
     tft.init();
     // tft.setRotation(1);
+    // tft.setRotation(3);
     tft.setRotation(3);
 
-    tft.setSwapBytes(true);
+    // tft.setSwapBytes(true);
+    tft.setSwapBytes(false);
+
 
     lv_init();
+    // lv_display_t * disp = lv_display_create(480, 320);
+    // lv_display_t * disp = lv_display_create(320, 480);
     lv_display_t * disp = lv_display_create(480, 320);
     lv_display_set_default(disp);
     //lv_tick_set_cb(millis);
+
+    lv_tick_set_cb(my_tick_get_cb);
 
     // 3️⃣ Associer le flush
     lv_display_set_flush_cb(disp, my_disp_flush);
@@ -97,7 +108,7 @@ void loop() {
     
     HandlePumpState();
 
-    lv_tick_inc(5);      // <-- AJOUT CRITIQUE
+    //lv_tick_inc(5);      // <-- AJOUT CRITIQUE
     lv_timer_handler();
     delay(1);
 

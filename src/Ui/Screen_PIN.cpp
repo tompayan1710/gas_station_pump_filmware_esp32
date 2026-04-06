@@ -37,7 +37,7 @@ void load_pin_screen() {
     lv_label_set_text(subtitle, "Utilisez le clavier physique");
     lv_obj_set_style_text_font(subtitle, &lv_font_montserrat_14, 0);
     lv_obj_set_style_text_color(subtitle, COLOR_SECONDARY_TEXT, 0);
-    lv_obj_align(subtitle, LV_ALIGN_BOTTOM_MID, 0, -50);
+    lv_obj_align(subtitle, LV_ALIGN_BOTTOM_MID, 0, -40);
 
     lv_scr_load(screen);
 }

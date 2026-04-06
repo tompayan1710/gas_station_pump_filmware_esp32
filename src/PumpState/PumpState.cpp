@@ -35,7 +35,10 @@ float price_DIESEL = -1.0;
 
 const char *fuelType = "";
 float price_per_liter = 0.0;
-float amount = 0.0;
+float min_liter = -1.0;
+float min_amount = -1.0;
+float amount = -1.0;
+
 const char *paymentType = "";
 
 bool should_broadcast_HS = false;
@@ -51,6 +54,10 @@ void HandlePumpState() {
         case PUMP_IDLE:{
             
             if(previousPumpState != PUMP_IDLE && currentPumpState == PUMP_IDLE){
+                min_liter = -1;
+                min_amount = -1;
+                pumpStateTimer = 0;
+
                 load_home_screen(); 
                 pumpStateTimer = millis();
                 previousPumpState = PUMP_IDLE;
@@ -132,7 +139,6 @@ void HandlePumpState() {
 
             if(previousPumpState != PUMP_WAITING_PIN){
                 load_pin_screen();
-                //sendStartTransactionAuthPacket(fuelType, paymentType, amount);
                 Serial.println("Action: Affichage PIN");
 
                 number_pin_enter = 0;
@@ -226,18 +232,30 @@ void HandlePumpState() {
             break;
         }
         case PUMP_WAITING_AUTH:{
-            /*if(previousPumpState != PUMP_WAITING_AUTH){
-                load_waiting_auth_screen();
-                pumpStateTimer = millis();
+            
+            if(previousPumpState != PUMP_WAITING_AUTH){
+                Serial.println("PUMP_WAITING_AUTH");
+                requestCarburantConfig();
+                pumpStateTimer = 0;
                 previousPumpState = PUMP_WAITING_AUTH;
-            }*/
-            currentPumpState = PUMP_READY_TO_FUEL;
+            }
+
+            if(min_liter > 0 && pumpStateTimer == 0){
+
+                min_amount = min_liter * price_per_liter;
+                Serial.println("sendStartTransactionAuthPacket");
+                sendStartTransactionAuthPacket(fuelType, paymentType, min_amount);
+                load_waiting_auth_screen();
+
+                pumpStateTimer = millis(); // bloque la répétition
+            }
+
             break;
         }
 
         case PUMP_READY_TO_FUEL:{
-            Serial.println("Action: PUMP_READY_TO_FUEL");
             if(previousPumpState != PUMP_READY_TO_FUEL){
+                Serial.println("Action: PUMP_READY_TO_FUEL");
                 load_action_prompt();
                 previousPumpState = PUMP_READY_TO_FUEL;
             }
@@ -265,17 +283,42 @@ void HandlePumpState() {
 
                 lastFlowTime = millis();
 
-                if(millis() - lastUpdateTime > 100){ // update toutes les 100ms
+                if(millis() - lastUpdateTime > 100){
                     lastUpdateTime = millis();
-                    liters += 0.02; // simulation débit
+                    liters += 0.05;
+
+                    float price_ht = liters * price_per_liter;
+                    float price_ttc = price_ht * 1.20;
 
                     char buffer[32];
+
+                    // Litres
                     snprintf(buffer, sizeof(buffer), "%.2f L", liters);
                     lv_label_set_text(progress_label, buffer);
 
-                    int percent = (int)(liters * 2); // juste visuel
+                    // HT
+                    snprintf(buffer, sizeof(buffer), "HT: %.2f EUR", price_ht);
+                    lv_label_set_text(price_ht_label, buffer);
+
+                    // TTC
+                    snprintf(buffer, sizeof(buffer), "TTC: %.2f EUR", price_ttc);
+                    lv_label_set_text(price_ttc_label, buffer);
+
+                    int percent = (int)(price_ht * 2);
                     if(percent > 100) percent = 100;
+
                     lv_bar_set_value(progress_bar, percent, LV_ANIM_OFF);
+
+                    // Correction logique minimum
+                    if(price_ht >= min_amount){
+                        lv_label_set_text(min_label, "Minimum atteint");
+                        lv_obj_set_style_text_color(min_label, COLOR_GREEN, 0);
+                        lv_obj_set_style_text_color(progress_label, COLOR_GREEN, 0);
+                        lv_obj_set_style_bg_color(progress_bar, COLOR_GREEN, LV_PART_INDICATOR);
+                    }
+                    else{
+                        lv_obj_set_style_bg_color(progress_bar, COLOR_RED, LV_PART_INDICATOR);
+                    }
                 }
             } else {
                 ledcWrite(PWM_CHANNEL_R, 0);
@@ -330,7 +373,7 @@ void HandlePumpState() {
             if(previousPumpState != PUMP_FINISHED) {
 
                 float totalPrice = price_per_liter * liters;
-                load_thank_you_screen(liters, totalPrice);
+                load_thank_you_screen();
 
                 pumpStateTimer = millis();
                 previousPumpState = PUMP_FINISHED;

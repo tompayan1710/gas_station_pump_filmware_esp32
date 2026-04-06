@@ -114,6 +114,15 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
                     price_DIESEL = prix;
                 }
             }
+            else if(strcmp(typeMsg, "CARBURANT_CONFIG") == 0){
+                
+                float min = doc["payload"]["livraisonMinimal"];
+
+                Serial.printf("Montant minimal reçu : %.2f\n", min);
+
+                min_liter = min;
+                Serial.printf("min_liter actuel: %.2f\n", min_liter);
+            }
             else if(strcmp(typeMsg, "TRANSACTION_AUTH_OK") == 0){
                 JsonObject payloadObj = doc["payload"];
                 const char *id_transaction = payloadObj["transaction_id"];
@@ -123,7 +132,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
                 Serial.print("Transaction ID: ");
                 Serial.println(currentTransactionId);
 
-                pumpDelay = 2000;
+                pumpDelay = 3000;
                 pumpDelayNextCurrentPumpState = PUMP_READY_TO_FUEL;
                 currentPumpState = PUMP_DELAY;
             } else if(strcmp(typeMsg, "TRANSACTION_AUTH_REFUSED") == 0){
@@ -229,6 +238,18 @@ void requestFuelPrices()
         webSocket.sendTXT(json);
     }
 }
+
+
+void requestCarburantConfig()
+{
+    StaticJsonDocument<128> doc;
+    doc["type"] = "GET_CARBURANT_CONFIG";
+    String json;
+    serializeJson(doc, json);
+    webSocket.sendTXT(json);
+}
+
+
 
 void sendStartTransactionAuthPacket(const char* fuelType, const char* paymentType, float amount){
     StaticJsonDocument<256> doc;
