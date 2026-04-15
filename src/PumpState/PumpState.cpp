@@ -41,6 +41,7 @@ float amount = -1.0;
 
 const char *paymentType = "";
 
+bool is_transaction_complete = false;
 bool should_broadcast_HS = false;
 
 void HandlePumpState() {
@@ -187,41 +188,54 @@ void HandlePumpState() {
 
             break;
         }
-       case PUMP_VERIFY_PIN:{
+        case PUMP_VERIFY_PIN:{
             static unsigned long verifyTimer = 0;
             static bool verifyStarted = false;
+            static bool resultShown = false;
+            static bool isPinValid = false;
             static int pinAttempts = 0;
 
             if(previousPumpState != PUMP_VERIFY_PIN){
                 load_verify_pin();
-                Serial.println("Verification du PIN...");
 
                 verifyTimer = millis();
                 verifyStarted = true;
+                resultShown = false;
 
                 previousPumpState = PUMP_VERIFY_PIN;
             }
 
-            if(verifyStarted && millis() - verifyTimer > 2000){
+            // Phase 1 → spinner (1 seconde)
+            if(verifyStarted && !resultShown && millis() - verifyTimer > 1000){
 
-                bool isPinValid = true; // simulation
+                isPinValid = true; // simulation
+
+                hide_verify_spinner(); // 🔥 IMPORTANT
 
                 if(isPinValid){
-                    Serial.println("PIN correct");
+                    update_verify_pin_text("CODE BON", true);
+                } else {
+                    update_verify_pin_text("CODE INVALIDE", false);
+                }
+
+                resultShown = true;
+                verifyTimer = millis();
+            }
+
+            // Phase 2 → afficher résultat (2 secondes)
+            if(resultShown && millis() - verifyTimer > 3000){
+
+                if(isPinValid){
                     pinAttempts = 0;
                     currentPumpState = PUMP_WAITING_AUTH;
                 }
                 else{
                     pinAttempts++;
-                    Serial.println("PIN incorrect");
 
                     if(pinAttempts >= 3){
-                        Serial.println("3 erreurs PIN -> retour accueil");
                         pinAttempts = 0;
                         currentPumpState = PUMP_IDLE;
-                    }
-                    else{
-                        Serial.println("Reessayer PIN");
+                    } else {
                         currentPumpState = PUMP_WAITING_PIN;
                     }
                 }
@@ -332,10 +346,10 @@ void HandlePumpState() {
 
             break;
         }
-        case PUMP_TRANSACTION_COMPLETE: {
+        /*case PUMP_TRANSACTION_COMPLETE: {
             static unsigned long retryTimer = 0;
             static int retryCount = 0;
-            const int maxRetry = 4; // par exemple
+            const int maxRetry = 4;
 
             if(previousPumpState != PUMP_TRANSACTION_COMPLETE) {
 
@@ -365,6 +379,53 @@ void HandlePumpState() {
                     // afficher un écran erreur
                     // idéalement sauvegarder la transaction en flash
                 }
+            }
+
+            break;
+        }*/
+        case PUMP_TRANSACTION_COMPLETE: {
+            static unsigned long retryTimer = 0;
+            static int retryCount = 0;
+            const int maxRetry = 4;
+
+            if(previousPumpState != PUMP_TRANSACTION_COMPLETE) {
+
+                float totalPrice = price_per_liter * liters;
+
+                load_transaction_waiting_complete_screen(liters, price_per_liter, totalPrice);
+
+                sendTransactionCompletePacket(currentTransactionId.c_str(), liters);
+
+                retryTimer = millis();
+                retryCount = 0;
+                previousPumpState = PUMP_TRANSACTION_COMPLETE;
+            }
+            break;
+        }
+        case PUMP_TRANSACTION_RESULT: {
+            static unsigned long resultTimer = 0;
+            static bool animationStarted = false;
+
+            if(!animationStarted){
+                resultTimer = millis();
+                animationStarted = true;
+                return;
+            }
+
+            if(millis() - resultTimer > 1000){
+
+                if(is_transaction_complete){
+                    update_transaction_result(true);
+                } else {
+                    update_transaction_result(false);
+                }
+
+                pumpStateTimer = millis();
+                currentPumpState = PUMP_DELAY;
+                pumpDelay = 2000;
+                pumpDelayNextCurrentPumpState = is_transaction_complete ? PUMP_FINISHED : PUMP_IDLE;
+
+                animationStarted = false;
             }
 
             break;

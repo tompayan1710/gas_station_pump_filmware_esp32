@@ -45,7 +45,7 @@ void load_action_prompt() {
 
 
     char buffer[64];
-    snprintf(buffer, sizeof(buffer), "Minimum: %.2f L requis", min_liter);
+    snprintf(buffer, sizeof(buffer), "Minimum de %.2fL a retirer", min_liter);
 
     min_label = lv_label_create(cont);
     lv_label_set_text(min_label, buffer);

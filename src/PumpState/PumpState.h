@@ -14,6 +14,7 @@ enum PumpState {
     PUMP_READY_TO_FUEL,   // Pistolet autorisé (électrovanne prête)
     PUMP_FUELING,         // Débit en cours (comptage impulsions)
     PUMP_TRANSACTION_COMPLETE,
+    PUMP_TRANSACTION_RESULT,
     PUMP_FINISHED,         // Fin de transaction, affichage résumé
     PUMP_DELAY,
     PUMP_HS                //Desactiver par un employé
@@ -38,7 +39,11 @@ extern float min_liter;
 extern float min_amount;
 extern float amount;
 
+
+
 extern const char* paymentType;
+
+extern bool is_transaction_complete;
 extern bool should_broadcast_HS;
 
 void HandlePumpState();

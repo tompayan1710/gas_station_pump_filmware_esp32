@@ -101,6 +101,7 @@ void setup() {
 }
 
 void loop() {
+    
     webSocket.loop();
 
     
@@ -119,6 +120,8 @@ void loop() {
     {
         Serial.printf("Touch %d %d\n",x,y);
     }
+    
+
     /*static unsigned long t = 0;
     static bool toggle = false;
 

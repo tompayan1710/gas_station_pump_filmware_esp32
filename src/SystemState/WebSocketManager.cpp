@@ -140,15 +140,11 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
 
                 currentPumpState = PUMP_IDLE;
             } else if(strcmp(typeMsg, "TRANSACTION_COMPLETE_OK") == 0){
-                currentTransactionId = "";
-                previousPumpState = PUMP_TRANSACTION_COMPLETE;
-                currentPumpState = PUMP_FINISHED;
-                
+                is_transaction_complete = true;
+                currentPumpState = PUMP_TRANSACTION_RESULT;
             } else if(strcmp(typeMsg, "TRANSACTION_COMPLETE_ERROR") == 0){
-
-                Serial.println("Erreur COMPLETE - retry...");
-
-                currentPumpState = PUMP_TRANSACTION_COMPLETE;
+                is_transaction_complete = false;
+                currentPumpState = PUMP_TRANSACTION_RESULT;
             }
             else if(strcmp(typeMsg, "PUMP_TOGGLE") == 0){
                 JsonObject payloadObj = doc["payload"];
