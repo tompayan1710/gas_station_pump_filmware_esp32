@@ -8,7 +8,16 @@ char keys[KEYPAD_ROWS][KEYPAD_COLS] = {
   {'*','0','#'}
 };
 
-byte rowPins[KEYPAD_ROWS] = {14, 32, 33, 26};
-byte colPins[KEYPAD_COLS] = {27, 13, 25};
+byte rowPins[KEYPAD_ROWS] = {
+  KEYPAD_ROW_PINS[0],
+  KEYPAD_ROW_PINS[1],
+  KEYPAD_ROW_PINS[2],
+  KEYPAD_ROW_PINS[3]
+};
+byte colPins[KEYPAD_COLS] = {
+  KEYPAD_COL_PINS[0],
+  KEYPAD_COL_PINS[1],
+  KEYPAD_COL_PINS[2]
+};
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, KEYPAD_ROWS, KEYPAD_COLS);

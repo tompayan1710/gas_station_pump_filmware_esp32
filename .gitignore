@@ -3,3 +3,4 @@
 managed_components/
 build/
 sdkconfig
+src/ConfigLocal.h
